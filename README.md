@@ -1,1 +1,1 @@
-# fantacy_baseball
+# fantasy_baseball
