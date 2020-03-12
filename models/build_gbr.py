@@ -54,10 +54,10 @@ x_test = test_df.drop(columns=not_features)
 y_test = test_df.HR_y
 
 regressor = GradientBoostingRegressor(
-    max_depth=5,
-    n_estimators=5000,
-    learning_rate=0.05,
-    min_samples_leaf=2
+    max_depth=3,
+    n_estimators=500,
+    learning_rate=0.1,
+    min_samples_leaf=1
 )
 
 regressor.fit(x_train, y_train)
@@ -73,4 +73,3 @@ show(plot)
 
 print(f'MAE was {mae} and r2 was {r2}')
 
-print("waiting")
