@@ -19,57 +19,65 @@ def create_res_plot(y_model, y_true, name='some text'):
     return p
 
 
-# load up the batting data
-df = pd.read_csv("../batting_data_1996_2019.csv")
+if __name__ == "__main__":
 
-# remove all of the columns that have nan values, this leaves 59
-nan_cols = df.columns[df.isna().any()].tolist()
-filter_df = df.drop(columns=nan_cols)
+    # load up the batting data
+    df = pd.read_csv("../batting_data_1996_2019.csv")
 
-# drop any columns you don't want here
-cols_to_remove = ['Age Rng']
-filter_df.drop(columns=cols_to_remove, inplace=True)
+    # remove all of the columns that have nan values, this leaves 59
+    nan_cols = df.columns[df.isna().any()].tolist()
+    filter_df = df.drop(columns=nan_cols)
 
-# What are we modeling?  Let's just do an example for modeling 2001 based on 2000
-dependent_cols = ['HR']
-not_features = ['Season', 'Name', 'Team', 'HR_y']
-combined_df = pd.DataFrame()
+    # drop any columns you don't want here
+    cols_to_remove = ['Age Rng']
+    filter_df.drop(columns=cols_to_remove, inplace=True)
 
-for season in range(1996, 2018):
-    dep_df = filter_df[filter_df.Season == (season+1)][['Name', 'HR']]
-    pred_df = filter_df[filter_df.Season == season]
-    temp_combined_df = pred_df.merge(dep_df, on='Name')
-    combined_df = combined_df.append(temp_combined_df)
+    # What are we modeling?  Let's just do an example for modeling 2001 based on 2000
+    dependent_cols = ['HR', 'G']
+    # we'll join on 'Name' for now so need to include that in dependent_cols
+    dependent_cols.append('Name')
+    not_features = ['Season', 'Name', 'Team', 'HR_y', 'G_y', 'HRpG']
+    combined_df = pd.DataFrame()
 
+    # TODO: try normalizing, try predicting HR/game
 
-# let's build models and predict
-combined_df.reset_index(inplace=True, drop=True)
-train_pct = 0.7
-train_df = combined_df.sample(frac=train_pct)
-test_df = combined_df.drop(train_df.index)
+    for season in range(1996, 2018):
+        dep_df = filter_df[filter_df.Season == (season+1)][dependent_cols]
+        pred_df = filter_df[filter_df.Season == season]
+        temp_combined_df = pred_df.merge(dep_df, on='Name')
+        combined_df = combined_df.append(temp_combined_df)
 
-x_train = train_df.drop(columns=not_features)
-y_train = train_df.HR_y
-x_test = test_df.drop(columns=not_features)
-y_test = test_df.HR_y
+    # let's try to change HRs to HR/game
+    combined_df['HRpG'] = combined_df.apply(lambda row: row.HR_y / row.G_y, axis=1)
 
-regressor = GradientBoostingRegressor(
-    max_depth=3,
-    n_estimators=500,
-    learning_rate=0.1,
-    min_samples_leaf=1
-)
+    # let's build models and predict
+    combined_df.reset_index(inplace=True, drop=True)
+    train_pct = 0.7
+    train_df = combined_df.sample(frac=train_pct)
+    test_df = combined_df.drop(train_df.index)
 
-regressor.fit(x_train, y_train)
+    x_train = train_df.drop(columns=not_features)
+    y_train = train_df.HRpG
+    x_test = test_df.drop(columns=not_features)
+    y_test = test_df.HRpG
 
-y_pred = regressor.predict(x_test)
-mae = mean_absolute_error(y_test, y_pred)
-r2 = r2_score(y_test, y_pred)
+    regressor = GradientBoostingRegressor(
+        max_depth=3,
+        n_estimators=500,
+        learning_rate=0.1,
+        min_samples_leaf=1
+    )
 
-plot = create_res_plot(y_pred, y_test, name=f'HR prediction, MAE = {mae: .2f}, R2 = {r2 :2f}')
-bokeh_output = r'C:\Users\jkarp\PycharmProjects\fantasy_baseball\output.html'
-io.output_file(bokeh_output)
-show(plot)
+    regressor.fit(x_train, y_train)
 
-print(f'MAE was {mae} and r2 was {r2}')
+    y_pred = regressor.predict(x_test)
+    mae = mean_absolute_error(y_test, y_pred)
+    r2 = r2_score(y_test, y_pred)
+
+    plot = create_res_plot(y_pred, y_test, name=f'HR prediction, MAE = {mae: .2f}, R2 = {r2 :2f}')
+    bokeh_output = r'C:\Users\jkarp\PycharmProjects\fantasy_baseball\output.html'
+    io.output_file(bokeh_output)
+    show(plot)
+
+    print(f'MAE was {mae} and r2 was {r2}')
 
