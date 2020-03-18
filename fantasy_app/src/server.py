@@ -1,6 +1,5 @@
 from flask import Flask, flash, redirect, render_template, request, session, abort,send_from_directory,send_file,jsonify
 from flask_mysqldb import MySQL
-import pandas as pd
 
 import json
 
@@ -23,10 +22,12 @@ def index():
 
 @app.route("/<player_name>")
 def get_player_stats(player_name):
-	cur = mysql.connection.cursor()
-	cur.execute("SELECT * FROM dbo.BattingDemo WHERE Name = %s ORDER BY Season", (player_name,))
-	player_data = cur.fetchall()
-	return render_template('data.html', data=player_data)
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT * FROM dbo.BattingDemo WHERE Name = %s ORDER BY Season", (player_name,))
+    num_fields = len(cur.description)
+    field_names = [i[0] for i in cur.description]
+    player_data = cur.fetchall()
+    return render_template('data.html', data=player_data, field_names=field_names)
 
 # run the application
 if __name__ == "__main__":
