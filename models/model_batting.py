@@ -21,7 +21,7 @@ def create_res_plot(y_model, y_true, name='some text'):
     p.circle(x=y_model, y=y_true)
     max_range = int(np.max(y_model))
     min_range = int(np.min(y_model))
-    x = range(min_range, max_range+5, 10)
+    x = range(min_range, max_range + 5, 10)
     y = x
     p.line(x=x, y=y)
     return p
@@ -29,7 +29,6 @@ def create_res_plot(y_model, y_true, name='some text'):
 
 def model_gbr(df, dependent_var, not_features, train_pct=0.7, n_estimators=2000, max_depth=3, learning_rate=0.05,
               min_samples_leaf=1):
-
     combined_df = pd.DataFrame()
     # we'll join on 'Name' for now so need to include that in dependent_cols
     dependent_cols = [dependent_var, 'Name']
@@ -67,8 +66,7 @@ def model_gbr(df, dependent_var, not_features, train_pct=0.7, n_estimators=2000,
 
 
 def model_gbr_norm(df, dependent_var, not_features, train_pct=0.7, n_estimators=2000, max_depth=3, learning_rate=0.05,
-              min_samples_leaf=1):
-
+                   min_samples_leaf=1):
     norm_var = f'{dependent_var}pG'
     combined_df = pd.DataFrame()
     # we'll join on 'Name' for now so need to include that in dependent_cols and need 'G' since we're predicting by game
@@ -112,7 +110,7 @@ def model_gbr_norm(df, dependent_var, not_features, train_pct=0.7, n_estimators=
     return regressor, plot
 
 
-def model_batting_normalized(input_file='../batting_data_1996_2019_expanded.csv'):
+def filter_data(input_file):
     # load up the batting data
     bat_df = pd.read_csv(input_file)
 
@@ -124,41 +122,10 @@ def model_batting_normalized(input_file='../batting_data_1996_2019_expanded.csv'
     cols_to_remove = ['Age Rng']
     filter_df.drop(columns=cols_to_remove, inplace=True)
 
-    # setup the list of what to model
-    dep_variables = ['HR', 'RBI', 'AVG', 'SB', 'R', 'OBP', 'TB', 'SLG']
-    models = {}
-    plots = {}
-
-    # setup the modeling hyperparams
-    trees = 500
-    depth = 3
-    rate = 0.03
-    samp_leaf = 1
-
-    for dep_var in dep_variables:
-        print(f'modeling {dep_var} per game (if appropriate)')
-        not_features_list = ['Season', 'Name', 'Team', f'{dep_var}_y']
-
-        # model and predict quality
-        if (dep_var == 'AVG') or (dep_var == 'OBP') or (dep_var == 'SLG'):
-            models[dep_var], plots[dep_var] = model_gbr(filter_df, dep_var, not_features_list, n_estimators=trees,
-                                                             max_depth=depth, learning_rate=rate,
-                                                             min_samples_leaf=samp_leaf)
-        else:
-            models[dep_var], plots[dep_var] = model_gbr_norm(filter_df, dep_var, not_features_list, n_estimators=trees,
-                                                         max_depth=depth, learning_rate=rate,
-                                                         min_samples_leaf=samp_leaf)
-
-    bokeh_output = r'C:\Users\jkarp\PycharmProjects\fantasy_baseball\output_normalized.html'
-    io.output_file(bokeh_output)
-    figures = []
-    for var in dep_variables:
-        figures.append(plots[var])
-
-    show(column(*figures))
+    return filter_df
 
 
-def model_batting(input_file='../batting_data_1996_2019_expanded.csv'):
+def filter_norm_data(input_file):
     # load up the batting data
     bat_df = pd.read_csv(input_file)
 
@@ -169,6 +136,19 @@ def model_batting(input_file='../batting_data_1996_2019_expanded.csv'):
     # drop any columns you don't want here
     cols_to_remove = ['Age Rng']
     filter_df.drop(columns=cols_to_remove, inplace=True)
+
+    stats_to_norm = ['AB', 'PA', 'H', '1B', '2B', '3B', 'HR', 'R', 'RBI', 'BB', 'IBB', 'SO', 'HBP', 'SF', 'SH', 'GDP',
+                     'SB', 'CS', 'TB']
+    for stat in stats_to_norm:
+        filter_df[f'{stat}pG'] = filter_df.apply(lambda row: row[stat] / row.G, axis=1)
+        filter_df.drop(columns=[stat], inplace=True)
+
+    return filter_df
+
+
+def model_batting(csv_file='../batting_data_1996_2019_expanded.csv'):
+    # load up the batting data
+    filter_df = filter_data(csv_file)
 
     # setup the list of what to model
     dep_variables = ['HR', 'RBI', 'AVG', 'SB', 'R', 'OBP', 'TB', 'SLG']
@@ -187,10 +167,42 @@ def model_batting(input_file='../batting_data_1996_2019_expanded.csv'):
 
         # model and predict quality
         models[dep_var], plots[dep_var] = model_gbr(filter_df, dep_var, not_features_list, n_estimators=trees,
-                                                             max_depth=depth, learning_rate=rate,
-                                                             min_samples_leaf=samp_leaf)
+                                                    max_depth=depth, learning_rate=rate,
+                                                    min_samples_leaf=samp_leaf)
 
     bokeh_output = r'C:\Users\jkarp\PycharmProjects\fantasy_baseball\output.html'
+    io.output_file(bokeh_output)
+    figures = []
+    for var in dep_variables:
+        figures.append(plots[var])
+
+    show(column(*figures))
+
+
+def model_batting_normalized(csv_file='../batting_data_1996_2019_expanded.csv'):
+    # load up the batting data, filter it, and put it into a dataframe
+    filter_df = filter_norm_data(csv_file)
+
+    # setup the list of what to model
+    dep_variables = ['HRpG', 'RBIpG', 'AVG', 'SBpG', 'RpG', 'OBP', 'TBpG', 'SLG']
+    models = {}
+    plots = {}
+
+    # setup the modeling hyperparams
+    trees = 500
+    depth = 3
+    rate = 0.03
+    samp_leaf = 1
+
+    for dep_var in dep_variables:
+        print(f'modeling {dep_var}')
+        not_features_list = ['Season', 'Name', 'Team', f'{dep_var}_y']
+
+        # model and predict quality
+        models[dep_var], plots[dep_var] = model_gbr(filter_df, dep_var, not_features_list, n_estimators=trees,
+                                                    max_depth=depth, learning_rate=rate, min_samples_leaf=samp_leaf)
+
+    bokeh_output = r'C:\Users\jkarp\PycharmProjects\fantasy_baseball\output_normalized.html'
     io.output_file(bokeh_output)
     figures = []
     for var in dep_variables:
