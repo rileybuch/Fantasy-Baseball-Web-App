@@ -112,9 +112,9 @@ def model_gbr_norm(df, dependent_var, not_features, train_pct=0.7, n_estimators=
     return regressor, plot
 
 
-def model_batting_normalized():
+def model_batting_normalized(input_file='../batting_data_1996_2019_expanded.csv'):
     # load up the batting data
-    bat_df = pd.read_csv("../batting_data_1996_2019.csv")
+    bat_df = pd.read_csv(input_file)
 
     # remove all of the columns that have nan values, this leaves 59
     nan_cols = bat_df.columns[bat_df.isna().any()].tolist()
@@ -125,7 +125,7 @@ def model_batting_normalized():
     filter_df.drop(columns=cols_to_remove, inplace=True)
 
     # setup the list of what to model
-    dep_variables = ['HR', 'RBI', 'AVG', 'SB', 'R']
+    dep_variables = ['HR', 'RBI', 'AVG', 'SB', 'R', 'OBP', 'TB', 'SLG']
     models = {}
     plots = {}
 
@@ -136,10 +136,11 @@ def model_batting_normalized():
     samp_leaf = 1
 
     for dep_var in dep_variables:
+        print(f'modeling {dep_var} per game (if appropriate)')
         not_features_list = ['Season', 'Name', 'Team', f'{dep_var}_y']
 
         # model and predict quality
-        if dep_var == 'AVG':
+        if (dep_var == 'AVG') or (dep_var == 'OBP') or (dep_var == 'SLG'):
             models[dep_var], plots[dep_var] = model_gbr(filter_df, dep_var, not_features_list, n_estimators=trees,
                                                              max_depth=depth, learning_rate=rate,
                                                              min_samples_leaf=samp_leaf)
@@ -148,7 +149,7 @@ def model_batting_normalized():
                                                          max_depth=depth, learning_rate=rate,
                                                          min_samples_leaf=samp_leaf)
 
-    bokeh_output = r'C:\Users\jkarp\PycharmProjects\fantasy_baseball\output.html'
+    bokeh_output = r'C:\Users\jkarp\PycharmProjects\fantasy_baseball\output_normalized.html'
     io.output_file(bokeh_output)
     figures = []
     for var in dep_variables:
@@ -157,9 +158,9 @@ def model_batting_normalized():
     show(column(*figures))
 
 
-def model_batting():
+def model_batting(input_file='../batting_data_1996_2019_expanded.csv'):
     # load up the batting data
-    bat_df = pd.read_csv("../batting_data_1996_2019.csv")
+    bat_df = pd.read_csv(input_file)
 
     # remove all of the columns that have nan values, this leaves 59
     nan_cols = bat_df.columns[bat_df.isna().any()].tolist()
@@ -170,7 +171,7 @@ def model_batting():
     filter_df.drop(columns=cols_to_remove, inplace=True)
 
     # setup the list of what to model
-    dep_variables = ['HR', 'RBI', 'AVG', 'SB', 'R']
+    dep_variables = ['HR', 'RBI', 'AVG', 'SB', 'R', 'OBP', 'TB', 'SLG']
     models = {}
     plots = {}
 
@@ -181,6 +182,7 @@ def model_batting():
     samp_leaf = 1
 
     for dep_var in dep_variables:
+        print(f'modeling {dep_var}')
         not_features_list = ['Season', 'Name', 'Team', f'{dep_var}_y']
 
         # model and predict quality
@@ -198,8 +200,10 @@ def model_batting():
 
 
 if __name__ == "__main__":
+    batting_data = r'C:\Users\jkarp\PycharmProjects\fantasy_baseball\batting_data_1996_2019_expanded.csv'
+
     # this models the 5 standard stats based off of the previous year
-    model_batting()
+    model_batting(batting_data)
 
     # this models the 5 standard stats by game (except batting average), based off the previous year
-    model_batting_normalized()
+    model_batting_normalized(batting_data)
