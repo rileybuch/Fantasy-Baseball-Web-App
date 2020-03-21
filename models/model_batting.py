@@ -4,7 +4,7 @@ from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.metrics import mean_absolute_error, r2_score
 from bokeh.plotting import figure, show
 from bokeh import io
-from bokeh.layouts import column
+from bokeh.layouts import column, gridplot
 
 
 def create_res_plot(y_model, y_true, name='some text'):
@@ -15,7 +15,7 @@ def create_res_plot(y_model, y_true, name='some text'):
     :param name: the stat being modeled
     :return:
     """
-    p = figure(title=f'actual vs residuals for {name}', plot_height=300, plot_width=800)
+    p = figure(title=f'actual vs residuals for {name}', plot_width=600)
     p.xaxis.axis_label = 'predicted values'
     p.yaxis.axis_label = 'actual values'
     p.circle(x=y_model, y=y_true)
@@ -27,42 +27,68 @@ def create_res_plot(y_model, y_true, name='some text'):
     return p
 
 
-def model_gbr(df, dependent_var, not_features, train_pct=0.7, n_estimators=2000, max_depth=3, learning_rate=0.05,
-              min_samples_leaf=1):
+def create_dev_plot(yrange, training_score, testing_score, name='Deviance Plot'):
+    p = figure(plot_width=400, title=name)
+    p.line(yrange, training_score, color='blue', line_width=2, legend_label='Training Data')
+    p.line(yrange, testing_score, color='orange', line_width=2, legend_label='Test Data')
+    return p
+
+
+def create_feat_imp_plot(sorted_names, sorted_importance, name='Feature Importance'):
+    p = figure(title=name, plot_width=400, y_range=sorted_names)
+    p.hbar(y=sorted_names, height=0.5, left=0, right=sorted_importance)
+    return p
+
+
+def model_gbr(df, dependent_var, not_features, params, train_pct=0.7):
     combined_df = pd.DataFrame()
     # we'll join on 'Name' for now so need to include that in dependent_cols
     dependent_cols = [dependent_var, 'Name']
-    for season in range(1996, 2018):
-        dep_df = df[df.Season == (season + 1)][dependent_cols]
-        pred_df = df[df.Season == season]
-        temp_combined_df = pred_df.merge(dep_df, on='Name')
+    for season in range(1996, 2017):
+        dep_df = df[df.Season == (season + 2)][dependent_cols]
+        pred_n1_df = df[df.Season == (season + 1)]
+        pred_n2_df = df[df.Season == season]
+        temp_1_combined_df = pred_n2_df.merge(pred_n1_df, on='Name', suffixes=('_n2', '_n1'))
+        temp_combined_df = temp_1_combined_df.merge(dep_df, on='Name')
         combined_df = combined_df.append(temp_combined_df)
 
     combined_df.reset_index(inplace=True, drop=True)
     # let's build models and predict
-    train_df = combined_df.sample(frac=train_pct)
+    train_df = combined_df.sample(frac=train_pct, random_state=1)
     test_df = combined_df.drop(train_df.index)
 
     x_train = train_df.drop(columns=not_features)
-    y_train = train_df[f'{dependent_var}_y']
+    y_train = train_df[dependent_var]
     x_test = test_df.drop(columns=not_features)
-    y_test = test_df[f'{dependent_var}_y']
+    y_test = test_df[dependent_var]
 
-    regressor = GradientBoostingRegressor(
-        max_depth=max_depth,
-        n_estimators=n_estimators,
-        learning_rate=learning_rate,
-        min_samples_leaf=min_samples_leaf
-    )
+    regressor = GradientBoostingRegressor(**params)
     regressor.fit(x_train, y_train)
 
     y_pred = regressor.predict(x_test)
     mae = mean_absolute_error(y_test, y_pred)
     r2 = r2_score(y_test, y_pred)
 
-    plot = create_res_plot(y_pred, y_test, name=f'{dependent_var} prediction, MAE = {mae: .2f}, R2 = {r2 :2f}')
+    # get training deviance
+    test_score = np.zeros((params['n_estimators'],), dtype=np.float64)
+    for i, y_pred in enumerate(regressor.staged_predict(x_test)):
+        test_score[i] = regressor.loss_(y_test, y_pred)
+
+    # get feature importance
+    feature_importance = regressor.feature_importances_
+    # make importances relative to max importance
+    feature_importance = 100.0 * (feature_importance / feature_importance.max())
+    sorted_idx = np.argsort(feature_importance)
+    sorted_idx = sorted_idx[-10:]
+    features = list(x_test.columns[sorted_idx])
+
+    plots = [create_res_plot(y_pred, y_test, name=f'{dependent_var} prediction, MAE = {mae: .2f}, R2 = {r2 :2f}'),
+             create_dev_plot(np.arange(params['n_estimators']) + 1, regressor.train_score_, test_score,
+                             f'{dependent_var} Deviance Plot'),
+             create_feat_imp_plot(features, feature_importance[sorted_idx], f'{dependent_var} Feature Importance')]
+
     print(f'Modeling {dependent_var}: MAE was {mae} and r2 was {r2}')
-    return regressor, plot
+    return regressor, plots
 
 
 def model_gbr_norm(df, dependent_var, not_features, train_pct=0.7, n_estimators=2000, max_depth=3, learning_rate=0.05,
@@ -75,13 +101,15 @@ def model_gbr_norm(df, dependent_var, not_features, train_pct=0.7, n_estimators=
     not_features.append(norm_var)
     not_features.append('G_y')
     for season in range(1996, 2018):
-        dep_df = df[df.Season == (season + 1)][dependent_cols]
-        pred_df = df[df.Season == season]
-        temp_combined_df = pred_df.merge(dep_df, on='Name')
+        dep_df = df[df.Season == (season + 2)][dependent_cols]
+        pred_n1_df = df[df.Season == (season + 1)]
+        pred_n2_df = df[df.Season == season]
+        temp_1_combined_df = pred_n2_df.merge(pred_n1_df, on='Name', suffixes=('_n2', '_n1'))
+        temp_combined_df = temp_1_combined_df.merge(dep_df, on='Name')
         combined_df = combined_df.append(temp_combined_df)
 
     # let's normalize the predicted stats by game
-    combined_df[norm_var] = combined_df.apply(lambda row: row[f'{dependent_var}_y'] / row.G_y, axis=1)
+    combined_df[norm_var] = combined_df.apply(lambda row: row[dependent_var] / row.G, axis=1)
 
     combined_df.reset_index(inplace=True, drop=True)
     # let's build models and predict
@@ -93,21 +121,33 @@ def model_gbr_norm(df, dependent_var, not_features, train_pct=0.7, n_estimators=
     x_test = test_df.drop(columns=not_features)
     y_test = test_df[norm_var]
 
-    regressor = GradientBoostingRegressor(
-        max_depth=max_depth,
-        n_estimators=n_estimators,
-        learning_rate=learning_rate,
-        min_samples_leaf=min_samples_leaf
-    )
+    regressor = GradientBoostingRegressor(**params)
     regressor.fit(x_train, y_train)
 
     y_pred = regressor.predict(x_test)
     mae = mean_absolute_error(y_test, y_pred)
     r2 = r2_score(y_test, y_pred)
 
-    plot = create_res_plot(y_pred, y_test, name=f'{dependent_var} per game prediction: MAE = {mae: .2f}, R2 = {r2 :2f}')
+    # get training deviance
+    test_score = np.zeros((params['n_estimators'],), dtype=np.float64)
+    for i, y_pred in enumerate(regressor.staged_predict(x_test)):
+        test_score[i] = regressor.loss_(y_test, y_pred)
+
+    # get feature importance
+    feature_importance = regressor.feature_importances_
+    # make importances relative to max importance
+    feature_importance = 100.0 * (feature_importance / feature_importance.max())
+    sorted_idx = np.argsort(feature_importance)
+    sorted_idx = sorted_idx[-10:]
+    features = list(x_test.columns[sorted_idx])
+
+    plots = [create_res_plot(y_pred, y_test, name=f'{dependent_var} prediction, MAE = {mae: .2f}, R2 = {r2 :2f}'),
+             create_dev_plot(np.arange(params['n_estimators']) + 1, regressor.train_score_, test_score,
+                             f'{dependent_var} Deviance Plot'),
+             create_feat_imp_plot(features, feature_importance[sorted_idx], f'{dependent_var} Feature Importance')]
+
     print(f'Modeling {dependent_var} per game: MAE was {mae} and r2 was {r2}')
-    return regressor, plot
+    return regressor, plots
 
 
 def filter_data(input_file):
@@ -146,7 +186,7 @@ def filter_norm_data(input_file):
     return filter_df
 
 
-def model_batting(csv_file='../batting_data_1996_2019_expanded.csv'):
+def model_batting(hyperparams, csv_file='../batting_data_1996_2019_expanded.csv'):
     # load up the batting data
     filter_df = filter_data(csv_file)
 
@@ -155,31 +195,24 @@ def model_batting(csv_file='../batting_data_1996_2019_expanded.csv'):
     models = {}
     plots = {}
 
-    # setup the modeling hyperparams
-    trees = 500
-    depth = 3
-    rate = 0.03
-    samp_leaf = 1
-
     for dep_var in dep_variables:
         print(f'modeling {dep_var}')
-        not_features_list = ['Season', 'Name', 'Team', f'{dep_var}_y']
+        not_features_list = ['Name', 'Season_n1', 'Team_n1', 'Season_n2', 'Team_n2', dep_var]
 
         # model and predict quality
-        models[dep_var], plots[dep_var] = model_gbr(filter_df, dep_var, not_features_list, n_estimators=trees,
-                                                    max_depth=depth, learning_rate=rate,
-                                                    min_samples_leaf=samp_leaf)
+        models[dep_var], plots[dep_var] = model_gbr(filter_df, dep_var, not_features_list, hyperparams)
 
     bokeh_output = r'C:\Users\jkarp\PycharmProjects\fantasy_baseball\output.html'
     io.output_file(bokeh_output)
     figures = []
     for var in dep_variables:
-        figures.append(plots[var])
+        for i in range(len(plots[var])):
+            figures.append(plots[var][i])
 
-    show(column(*figures))
+    show(gridplot(figures, ncols=3, plot_height=300, merge_tools=False))
 
 
-def model_batting_normalized(csv_file='../batting_data_1996_2019_expanded.csv'):
+def model_batting_normalized(hyperparams, csv_file='../batting_data_1996_2019_expanded.csv'):
     # load up the batting data, filter it, and put it into a dataframe
     filter_df = filter_norm_data(csv_file)
 
@@ -188,34 +221,30 @@ def model_batting_normalized(csv_file='../batting_data_1996_2019_expanded.csv'):
     models = {}
     plots = {}
 
-    # setup the modeling hyperparams
-    trees = 500
-    depth = 3
-    rate = 0.03
-    samp_leaf = 1
-
     for dep_var in dep_variables:
         print(f'modeling {dep_var}')
-        not_features_list = ['Season', 'Name', 'Team', f'{dep_var}_y']
-
+        not_features_list = ['Name', 'Season_n1', 'Team_n1', 'Season_n2', 'Team_n2', dep_var]
         # model and predict quality
-        models[dep_var], plots[dep_var] = model_gbr(filter_df, dep_var, not_features_list, n_estimators=trees,
-                                                    max_depth=depth, learning_rate=rate, min_samples_leaf=samp_leaf)
+        models[dep_var], plots[dep_var] = model_gbr(filter_df, dep_var, not_features_list, hyperparams)
 
     bokeh_output = r'C:\Users\jkarp\PycharmProjects\fantasy_baseball\output_normalized.html'
     io.output_file(bokeh_output)
     figures = []
     for var in dep_variables:
-        figures.append(plots[var])
+        for i in range(len(plots[var])):
+            figures.append(plots[var][i])
 
-    show(column(*figures))
+    show(gridplot(figures, ncols=3, plot_height=300, merge_tools=False))
 
 
 if __name__ == "__main__":
     batting_data = r'C:\Users\jkarp\PycharmProjects\fantasy_baseball\batting_data_1996_2019_expanded.csv'
 
     # this models the 5 standard stats based off of the previous year
-    model_batting(batting_data)
+    params = {'n_estimators': 1000, 'max_depth': 3, 'min_samples_split': 2, 'learning_rate': 0.01,
+              'min_samples_leaf': 1}
+
+    model_batting(params, batting_data)
 
     # this models the 5 standard stats by game (except batting average), based off the previous year
-    model_batting_normalized(batting_data)
+    model_batting_normalized(params, batting_data)
