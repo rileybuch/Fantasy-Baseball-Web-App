@@ -5,7 +5,7 @@ import pymysql
 insert_query = """INSERT INTO dbo.BattingDemo(Season,Name,Team,Age,G,AB,PA,H,1B,2B,3B,HR,R,RBI,BB,IBB,SO,HBP,SF,SH,GDP,SB,CS,AVG,GB,FB,LD,IFFB,Pitches,Balls,Strikes)
 VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"""
 
-batting_file = "../src/data/batting_data_1996_2019.csv"
+batting_file = "batting_data_1996_2019.csv"
 data = []
 
 with open(batting_file) as csvfile:
@@ -46,7 +46,7 @@ with open(batting_file) as csvfile:
 			))
 
 con = pymysql.connect(
-	host='localhost',
+	host='fantasy_baseball_db',
 	user='root',
 	password='root',
 	db='dbo'
