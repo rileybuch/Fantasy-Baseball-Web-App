@@ -94,7 +94,7 @@ tr:hover td { background-color: #edf8b1; }
 <script src="https://d3js.org/d3.v3.js"></script>
 <script>
 
-var column_names = ["Season","Name","Team","Age", "G", "AB","PA","H","1B","2B","3B","HR","R","RBI","BB", "IBB", "SO","HBP", "SF", "SH", "GDP", "SB", "CS", "AVG"];
+var column_names = ["Season","Name","Team","Age", "G", "AB","PA","H","1B","2B","3B","HR","R","RBI","BB", "IBB", "SO","HBP", "SF", "SH", "GDP", "SB", "CS", "AVG","Compare"];
 var clicks = {views: 0, title: 0, created_on: 0, url: 0, id: 0, g: 0, AB: 0,PA: 0,H: 0,onebase: 0,twobase: 0,threebase:0,HR:0};
 
 // draw the table
@@ -187,7 +187,7 @@ d3.json("/baseballtest", function(data) { // loading data from server
 		    arr.push(d[k]);
           }
         }
-        return [arr[0],arr[1],arr[2],arr[3],arr[4],arr[5],arr[6],arr[7],arr[8],arr[9],arr[10],arr[11],arr[12],arr[13],arr[14],arr[15],arr[16],arr[17],arr[18],arr[19],arr[20],arr[21],arr[22],arr[23]];
+        return [arr[0],arr[1],arr[2],arr[3],arr[4],arr[5],arr[6],arr[7],arr[8],arr[9],arr[10],arr[11],arr[12],arr[13],arr[14],arr[15],arr[16],arr[17],arr[18],arr[19],arr[20],arr[21],arr[22],arr[23], ""];
       })
     .enter()
       .append("td")
@@ -203,11 +203,42 @@ d3.json("/baseballtest", function(data) { // loading data from server
     return i == 1  
   })
 
-  console.log(row_entries_with_anchor)
   row_entries_with_anchor
     .append("a")
     .attr("href", function(d) { return "/individual/" + d })
   .text(function(d) { return d; })
+
+  checkbox_column = row_entries.filter(function(d, i) {
+    return i == 24
+  })
+
+  let checked_boxes = 0;
+  checkbox_column.append("input").attr("class", "checkboxes").attr("type", "checkbox").on("change", function(){
+    var slides = this.parentNode.parentNode.parentNode.getElementsByClassName("checkboxes")
+    console.log(this.parentNode.parentNode.childNodes[1].childNodes[0].text)
+    if (this.checked){
+      checked_boxes += 1;
+    } else {
+      checked_boxes -= 1;
+    }
+    if (checked_boxes == 2) {
+      for (let box of slides) {
+        if (!box.checked) {
+          box.disabled = true
+        }
+      }
+    }
+    else if (checked_boxes < 2) {
+      for (let box of slides) {
+        if (box.disabled){
+          box.disabled = false
+        }
+      }
+    }  
+  })
+
+  
+
     
     
   /**  search functionality **/
