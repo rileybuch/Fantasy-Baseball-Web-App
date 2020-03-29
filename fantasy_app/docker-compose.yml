@@ -1,0 +1,21 @@
+version: '3'
+services:
+  db:
+    container_name: fantasy_baseball_db
+    image: mysql:5.7
+    volumes:
+      - ./sql_scripts:/docker-entrypoint-initdb.d
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+  db-seed:
+    build: ./sql_scripts
+    depends_on:
+      - db
+  app:
+    build: ./
+    links:
+      - db
+    ports:
+      - 8080:8080
