@@ -35,12 +35,8 @@ def home():
 @app.route("/baseballtest")
 def get_home_data():
     cur = mysql.connection.cursor()
-    cur.execute("SELECT Season views, Name id, Team created_on, Age title, G, AB, PA, H, `1B`, `2B`, `3B`, HR, R, RBI, BB, IBB, SO, HBP, SF, SH, GDP, SB, CS, AVG FROM dbo.BattingDemo WHERE Season = 2019 ORDER BY HR DESC")
+    cur.execute("SELECT Season views, Name id, Team created_on, Age title, G, AB, PA, H, `1B`, `2B`, `3B`, HR, R, RBI, BB, IBB, SO, HBP, SF, SH, GDP, SB, CS, AVG, ROW_NUMBER() OVER (ORDER BY Season) num FROM dbo.BattingDemo WHERE Season = 2019 ORDER BY HR DESC")
     data = cur.fetchall()
-    num = 1
-    for entry in data:
-        entry['num'] = num
-        num += 1
     response = Response(response=json.dumps(data, default=decimal_default), status=200, mimetype="application/json")
     return(response)
 
@@ -52,12 +48,8 @@ def get_player_stats1(player_name):
 @app.route("/<player_name>")
 def get_player_stats2(player_name):
     cur = mysql.connection.cursor()
-    cur.execute("SELECT Season views, Name id, Team created_on, Age title, G, AB, PA, H, `1B`, `2B`, `3B`, HR, R, RBI, BB, IBB, SO, HBP, SF, SH, GDP, SB, CS, AVG FROM dbo.BattingDemo WHERE Name = %s ORDER BY Season DESC", (player_name,))
+    cur.execute("SELECT Season views, Name id, Team created_on, Age title, G, AB, PA, H, `1B`, `2B`, `3B`, HR, R, RBI, BB, IBB, SO, HBP, SF, SH, GDP, SB, CS, AVG, ROW_NUMBER OVER (ORDER BY Season DESC) num FROM dbo.BattingDemo WHERE Name = %s ORDER BY Season DESC", (player_name,))
     data = cur.fetchall()
-    num = 1
-    for entry in data:
-        entry['num'] = num
-        num += 1
     response = Response(response=json.dumps(data, default=decimal_default), status=200, mimetype="application/json")
     return(response)
 
