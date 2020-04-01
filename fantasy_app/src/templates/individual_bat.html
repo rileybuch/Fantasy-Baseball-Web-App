@@ -161,7 +161,7 @@ var headers = table.select("tr").selectAll("th")
 
 var rows, row_entries, row_entries_no_anchor, row_entries_with_anchor;
   
-d3.json("/{{player_name}}", function(data) { // loading data from server
+d3.json("/stat/{{player_name}}", function(data) { // loading data from server
   // console.log("data:", data);
   // draw table body with rows
   table.append("tbody")
