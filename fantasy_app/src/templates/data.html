@@ -8,5 +8,18 @@
     {% for result in players %}
 		   <p>{{result}}</p>
 		{% endfor %}
+    <form method="POST" action="/compare">
+      G<input type="checkbox" name="stats" value="G">
+      HR<input type="checkbox" name="stats" value="HR">
+      AB<input type="checkbox" name="stats" value="AB">
+      PA<input type="checkbox" name="stats" value="PA">
+      H<input type="checkbox" name="stats" value="H">
+      SB<input type="checkbox" name="stats" value="SB">
+      CS<input type="checkbox" name="stats" value="CS">
+      AVG<input type="checkbox" name="stats" value="AVG">
+      R<input type="checkbox" name="stats" value="R">
+      RBI<input type="checkbox" name="stats" value="RBI">
+      <input type="submit" value="Compare These Stats">
+    </form>
   </body>
 </html>  

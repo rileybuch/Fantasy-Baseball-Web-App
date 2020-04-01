@@ -4,7 +4,6 @@ import pandas as pd
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
-# import request
 import json, decimal
 
 app = Flask(__name__)
@@ -63,9 +62,13 @@ def get_individual_stats(player_name):
     response = Response(response=json.dumps(data, default=decimal_default), status=200, mimetype="application/json")
     return(response)
 
-# @app.route("/compare")
-# def render_individual_stats(player_name):
-#     return render_template('individual_bat.html', player_name=player_name)
+@app.route("/compare", methods=['POST'])
+def compare_stats():
+    stats = request.form.getlist('stats')
+    if len(stats) > 0:
+        return render_template('index.html')
+    else:
+        return ('', 204)
 
 @app.route("/pandastest")
 def test_pandas():
