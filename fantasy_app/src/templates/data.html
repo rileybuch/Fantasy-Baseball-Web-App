@@ -5,10 +5,10 @@
 	<script src="https://d3js.org/d3.v3.min.js"></script>
   </head>
   <body>
-    {% for result in players %}
-		   <p>{{result}}</p>
-		{% endfor %}
     <form method="POST" action="/compare">
+      {% for result in players %}
+        <p>{{result}}</p>
+      {% endfor %}
       G<input type="checkbox" name="stats" value="G">
       HR<input type="checkbox" name="stats" value="HR">
       AB<input type="checkbox" name="stats" value="AB">
