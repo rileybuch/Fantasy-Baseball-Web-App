@@ -40,7 +40,13 @@ def home():
         players = request.form.getlist('checks')
         if len(players) == 2:
             session['player_list'] = players
-            return render_template('data.html', players=players)
+            cur = mysql.connection.cursor()
+            cur.execute("SELECT a.Season FROM (SELECT DISTINCT Season Season FROM dbo.BattingDemo WHERE Name = %s) a INNER JOIN (SELECT DISTINCT Season Season FROM dbo.BattingDemo WHERE Name = %s) b ON a.Season = b.Season ORDER BY a.Season DESC", (players[0], players[1],))
+            data = cur.fetchall()
+            seasons = []
+            for entry in data:
+                seasons.append(entry['Season'])
+            return render_template('data.html', players=players, seasons=seasons)
         else:
             return ('', 204)
     return render_template('sorting_bat_modify.html')
@@ -69,10 +75,9 @@ def get_individual_stats(player_name):
 @app.route("/compare", methods=['POST'])
 def compare_stats():
     stats = request.form.getlist('stats')
+    season = request.form.get('season')
     if len(stats) > 0:
-        print(stats)
-        print(session['player_list'])
-        fig = make_chart(2019, session['player_list'], stats)
+        fig = make_chart(int(season), session['player_list'], stats)
         encoded = fig_to_base64(fig)
         encoded = encoded.decode('utf-8')
         return render_template('index.html', image=encoded)
@@ -120,6 +125,7 @@ def recalculation(one, two):
     return one_list, two_list
 
 def make_chart(Year, players, comparison_labels):
+    matplotlib.pyplot.switch_backend('Agg')
     one = []
     two = []
 

@@ -9,6 +9,11 @@
       {% for result in players %}
         <p>{{result}}</p>
       {% endfor %}
+      <select name="season">
+      {% for season in seasons %}
+        <option value="{{season}}">{{season}}</option>
+      {% endfor %}
+      </select> <br/>
       G<input type="checkbox" name="stats" value="G">
       HR<input type="checkbox" name="stats" value="HR">
       AB<input type="checkbox" name="stats" value="AB">
