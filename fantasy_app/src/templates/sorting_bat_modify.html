@@ -91,7 +91,7 @@ tr:hover td { background-color: #edf8b1; }
 
 </style>
 <body>
-  <form method="POST" action="/home"></form>
+  <form method="POST" action="/"></form>
 </body>
 <script src="https://d3js.org/d3.v3.js"></script>
 <script>
@@ -165,7 +165,7 @@ var headers = table.select("tr").selectAll("th")
 
 var rows, row_entries, row_entries_no_anchor, row_entries_with_anchor, checkbox_column, checked_boxes = 0;
   
-d3.json("/baseballtest", function(data) { // loading data from server
+d3.json("/battingdata", function(data) { // loading data from server
   // console.log("data:", data);
   // draw table body with rows
   table.append("tbody")
