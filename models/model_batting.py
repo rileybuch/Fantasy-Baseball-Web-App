@@ -218,6 +218,7 @@ def model_batting_normalized(hyperparams, csv_file='../batting_data_1996_2019_ex
 
     # setup the list of what to model
     dep_variables = ['HRpG', 'RBIpG', 'AVG', 'SBpG', 'RpG', 'OBP', 'TBpG', 'SLG']
+    # dep_variables = ['HRpG', 'RBIpG']
     models = {}
     plots = {}
 
@@ -227,7 +228,7 @@ def model_batting_normalized(hyperparams, csv_file='../batting_data_1996_2019_ex
         # model and predict quality
         models[dep_var], plots[dep_var] = model_gbr(filter_df, dep_var, not_features_list, hyperparams)
 
-    bokeh_output = r'C:\Users\jkarp\PycharmProjects\fantasy_baseball\output_normalized.html'
+    bokeh_output = r'C:\Users\jkarp\PycharmProjects\fantasy_baseball\output_normalized1.html'
     io.output_file(bokeh_output)
     figures = []
     for var in dep_variables:
@@ -235,6 +236,30 @@ def model_batting_normalized(hyperparams, csv_file='../batting_data_1996_2019_ex
             figures.append(plots[var][i])
 
     show(gridplot(figures, ncols=3, plot_height=300, merge_tools=False))
+
+    return filter_df, models
+
+
+def make_predictions(df, models, games_per_season):
+    pred_n2_df = df[df.Season == 2018]
+    pred_n1_df = df[df.Season == 2019]
+    combined_df = pred_n2_df.merge(pred_n1_df, on='Name', suffixes=('_n2', '_n1'))
+    combined_df.reset_index(inplace=True, drop=True)
+    X = combined_df.drop(columns=['Name', 'Season_n1', 'Team_n1', 'Season_n2', 'Team_n2'])
+    pred_df = combined_df[['Name', 'key_mlbam_n1']].copy()
+    pred_df['Season'] = 2020
+    pred_df.rename(columns={'key_mlbam_n1': 'key_mlbam'}, inplace=True)
+
+    # make predictions for 2020 based on 2019
+    for stat, model in models.items():
+        print(f'making {stat} predictions for 2020')
+        preds = model.predict(X)
+        pred_df[stat] = preds
+        if stat.endswith('pG'):
+            pred_df[f'{stat[:-2]}'] = pred_df.apply(lambda row: int(row[stat] * games_per_season), axis=1)
+            pred_df.drop(columns=[stat], inplace=True)
+
+    return pred_df
 
 
 if __name__ == "__main__":
@@ -244,7 +269,20 @@ if __name__ == "__main__":
     params = {'n_estimators': 1000, 'max_depth': 3, 'min_samples_split': 2, 'learning_rate': 0.01,
               'min_samples_leaf': 1}
 
-    model_batting(params, batting_data)
+    # model_batting(params, batting_data)
 
     # this models the 5 standard stats by game (except batting average), based off the previous year
-    model_batting_normalized(params, batting_data)
+    norm_filter_df, norm_models = model_batting_normalized(params, batting_data)
+
+    # convert predict the 2020 season and merge it with previous data
+    games = 162
+    pred_df = make_predictions(norm_filter_df, norm_models, games)
+
+    filter_df = filter_data(batting_data)
+    full_df = filter_df.append(pred_df)
+
+    full_df.to_csv('../batting_data_1996_2020.csv', index=False)
+
+    pass
+
+

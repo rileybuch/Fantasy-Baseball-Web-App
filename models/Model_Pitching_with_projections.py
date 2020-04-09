@@ -288,8 +288,8 @@ def model_pitching_normalized(hyperparams, csv_file='../pitching_data_1996_2019.
     show(gridplot(figures, ncols=3, plot_height=300, merge_tools=False))
     
     # make predictions for 2020
-    pred_n1_df = filter_df[filter_df.Season == 2018]
-    pred_n2_df = filter_df[filter_df.Season == 2019]
+    pred_n2_df = filter_df[filter_df.Season == 2018]
+    pred_n1_df = filter_df[filter_df.Season == 2019]
     combined_df = pred_n2_df.merge(pred_n1_df, on='Name', suffixes=('_n2', '_n1'))
     combined_df.reset_index(inplace=True, drop=True)
     X = combined_df.drop(columns=['Name', 'Season_n1', 'Team_n1', 'Season_n2', 'Team_n2'])
