@@ -91,16 +91,14 @@ tr:hover td { background-color: #edf8b1; }
 
 </style>
 <body>
-  <form method="POST" action="/batters"></form>
-</body>
 <script src="https://d3js.org/d3.v3.js"></script>
 <script>
 
-var column_names = ["Season","Name","Team","Age", "G", "AB","PA","H","1B","2B","3B","HR","R","RBI","BB", "IBB", "SO","HBP", "SF", "SH", "GDP", "SB", "CS", "AVG","Compare"];
+var column_names = ["Season","Name","Team","Age","W","L","ERA","WAR","G","GS","CG","ShO","SV","BS","IP","TBF","H","R","ER","HR","BB","Balls","Strikes","Pitches"];
 var clicks = {views: 0, title: 0, created_on: 0, url: 0, id: 0, g: 0, AB: 0,PA: 0,H: 0,onebase: 0,twobase: 0,threebase:0,HR:0};
 
 // draw the table
-d3.select("form").append("div")
+d3.select("body").append("div")
   .attr("id", "container")
 
 d3.select("#container").append("div")
@@ -110,41 +108,39 @@ d3.select("#FilterableTable").append("h1")
   .attr("id", "title")
   .text("MLB player stats")
 
-d3.select("#FilterableTable").append("div")
-  .attr("class", "SearchBar")
-  .append("p")
-    .attr("class", "SearchBar")
-    .text("Search By Player:");
+// d3.select("#FilterableTable").append("div")
+//   .attr("class", "SearchBar")
+//   .append("p")
+//     .attr("class", "SearchBar")
+//     .text("Search By Player:");
 
-d3.select(".SearchBar")
-  .append("input")
-    .attr("class", "SearchBar")
-    .attr("id", "search")
-    .attr("type", "text")
-    .attr("placeholder", "Search...");
+// d3.select(".SearchBar")
+//   .append("input")
+//     .attr("class", "SearchBar")
+//     .attr("id", "search")
+//     .attr("type", "text")
+//     .attr("placeholder", "Search...");
 
-// second search bar
-d3.select("#FilterableTable").append("div")
-  .attr("class", "SearchBar2")
-  .append("p")
-    .attr("class", "SearchBar")
-    .text("Search By Team:");
+// // second search bar
+// d3.select("#FilterableTable").append("div")
+//   .attr("class", "SearchBar2")
+//   .append("p")
+//     .attr("class", "SearchBar")
+//     .text("Search By Team:");
 
-d3.select(".SearchBar2")
-  .append("input")
-    .attr("class", "SearchBar")
-    .attr("id", "search2")
-    .attr("type", "text")
-    .attr("placeholder", "Search...");
+// d3.select(".SearchBar2")
+//   .append("input")
+//     .attr("class", "SearchBar")
+//     .attr("id", "search2")
+//     .attr("type", "text")
+//     .attr("placeholder", "Search...");
 
-// third search bar
-d3.select("#FilterableTable").append("div")
-  .attr("class", "SearchBar3")
-  .append("input")
-    // .attr("class", "SearchBar")
-    .attr("type", "submit")
-    .attr("value", "Compare Players")
-
+// // third search bar
+// d3.select("#FilterableTable").append("div")
+//   .attr("class", "SearchBar3")
+//   .append("p")
+//     .attr("class", "SearchBar")
+//     .text("Search By Year:");
 
 // d3.select(".SearchBar3")
 //   .append("input")
@@ -163,9 +159,9 @@ var headers = table.select("tr").selectAll("th")
     .append("th")
     .text(function(d) { return d; });
 
-var rows, row_entries, row_entries_no_anchor, row_entries_with_anchor, checkbox_column, checked_boxes = 0;
+var rows, row_entries, row_entries_no_anchor, row_entries_with_anchor;
   
-d3.json("/battingdata", function(data) { // loading data from server
+d3.json("/stat/{{player_name}}", function(data) { // loading data from server
   // console.log("data:", data);
   // draw table body with rows
   table.append("tbody")
@@ -191,55 +187,14 @@ d3.json("/battingdata", function(data) { // loading data from server
 		    arr.push(d[k]);
           }
         }
-        return [arr[0],arr[1],arr[2],arr[3],arr[4],arr[5],arr[6],arr[7],arr[8],arr[9],arr[10],arr[11],arr[12],arr[13],arr[14],arr[15],arr[16],arr[17],arr[18],arr[19],arr[20],arr[21],arr[22],arr[23], ""];
+        return [arr[0],arr[1],arr[2],arr[3],arr[4],arr[5],arr[6],arr[7],arr[8],arr[9],arr[10],arr[11],arr[12],arr[13],arr[14],arr[15],arr[16],arr[17],arr[18],arr[19],arr[20],arr[21],arr[22],arr[23]];
       })
     .enter()
       .append("td")
 
   // draw row entries with no anchor 
-  row_entries_no_anchor = row_entries.filter(function(d, i) {
-    return i != 1  
-  })
-  row_entries_no_anchor.text(function(d) { return d; })
-
-  // draw row entries with anchor
-  row_entries_with_anchor = row_entries.filter(function(d, i) {
-    return i == 1  
-  })
-
-  row_entries_with_anchor
-    .append("a")
-    .attr("href", function(d) { return "/individual_bat/" + d })
-  .text(function(d) { return d; })
-
-  checkbox_column = row_entries.filter(function(d, i) {
-    return i == 24
-  })
-
-  checkbox_column.append("input").attr("class", "checkboxes").attr("name", "checks")
-    .attr("value", function(d, i) {return this.parentNode.parentNode.childNodes[1].childNodes[0].text}).attr("type", "checkbox").on("change", function(){
-    var slides = this.parentNode.parentNode.parentNode.getElementsByClassName("checkboxes")
-    if (this.checked){
-      checked_boxes += 1;
-    } else {
-      checked_boxes -= 1;
-    }
-    if (checked_boxes == 2) {
-      for (let box of slides) {
-        if (!box.checked) {
-          box.disabled = true
-        }
-      }
-    }
-    else if (checked_boxes < 2) {
-      for (let box of slides) {
-        if (box.disabled){
-          box.disabled = false
-        }
-      }
-    }  
-  })
-
+  row_entries.text(function(d) { return d; })
+    
     
   /**  search functionality **/
     d3.select("#search")
@@ -288,53 +243,27 @@ d3.json("/battingdata", function(data) { // loading data from server
 		          arr.push(d[k]);
                 }
               }
-              return [arr[0],arr[1],arr[2],arr[3],arr[4],arr[5],arr[6],arr[7],arr[8],arr[9],arr[10],arr[11],arr[12],arr[13],arr[14],arr[15],arr[16],arr[17],arr[18],arr[19],arr[20],arr[21],arr[22],arr[23], ""];
+              return [arr[0],arr[1],arr[2],arr[3],arr[4],arr[5],arr[6],arr[7],arr[8],arr[9],arr[10],arr[11],arr[12],arr[13],arr[14],arr[15],arr[16],arr[17],arr[18],arr[19],arr[20],arr[21],arr[22],arr[23]];
             })
           .enter()
             .append("td") 
 
         // draw row entries with no anchor 
-        row_entries_no_anchor = row_entries.filter(function(d, i) {
-          return i != 1  
+        row_entries_no_anchor = row_entries.filter(function(d) {
+          return (/https?:\/\//.test(d) == false)
         })
         row_entries_no_anchor.text(function(d) { return d; })
 
         // draw row entries with anchor
-        row_entries_with_anchor = row_entries.filter(function(d, i) {
-          return i == 1  
+        row_entries_with_anchor = row_entries.filter(function(d) {
+          return (/https?:\/\//.test(d) == true)  
         })
-
         row_entries_with_anchor
           .append("a")
-          .attr("href", function(d) { return "/individual_bat/" + d })
+          .attr("href", function(d) { return d; })
+          .attr("target", "_blank")
         .text(function(d) { return d; })
-
-        checkbox_column = row_entries.filter(function(d, i) {
-          return i == 24
-        })
-        checkbox_column.append("input").attr("class", "checkboxes").attr("name", "checks")
-          .attr("value", function(d, i) {return this.parentNode.parentNode.childNodes[1].childNodes[0].text}).attr("type", "checkbox").on("change", function(){
-          var slides = this.parentNode.parentNode.parentNode.getElementsByClassName("checkboxes")
-          if (this.checked){
-            checked_boxes += 1;
-          } else {
-            checked_boxes -= 1;
-          }
-          if (checked_boxes == 2) {
-            for (let box of slides) {
-              if (!box.checked) {
-                box.disabled = true
-              }
-            }
-          }
-          else if (checked_boxes < 2) {
-            for (let box of slides) {
-              if (box.disabled){
-                box.disabled = false
-              }
-            }
-          }  
-        })
+        
         // exit
         rows.exit().remove();
       })
@@ -388,135 +317,108 @@ d3.json("/battingdata", function(data) { // loading data from server
               arr.push(d[k]);
                 }
               }
-              return [arr[0],arr[1],arr[2],arr[3],arr[4],arr[5],arr[6],arr[7],arr[8],arr[9],arr[10],arr[11],arr[12],arr[13],arr[14],arr[15],arr[16],arr[17],arr[18],arr[19],arr[20],arr[21],arr[22],arr[23], ""];
+              return [arr[0],arr[1],arr[2],arr[3],arr[4],arr[5],arr[6],arr[7],arr[8],arr[9],arr[10],arr[11],arr[12],arr[13],arr[14],arr[15],arr[16],arr[17],arr[18],arr[19],arr[20],arr[21],arr[22],arr[23]];
             })
           .enter()
             .append("td") 
 
         // draw row entries with no anchor 
-        row_entries_no_anchor = row_entries.filter(function(d, i) {
-          return i != 1  
+        row_entries_no_anchor = row_entries.filter(function(d) {
+          return (/https?:\/\//.test(d) == false)
         })
         row_entries_no_anchor.text(function(d) { return d; })
 
         // draw row entries with anchor
-        row_entries_with_anchor = row_entries.filter(function(d, i) {
-          return i == 1  
+        row_entries_with_anchor = row_entries.filter(function(d) {
+          return (/https?:\/\//.test(d) == true)  
         })
-
         row_entries_with_anchor
           .append("a")
-          .attr("href", function(d) { return "/individual_bat/" + d })
+          .attr("href", function(d) { return d; })
+          .attr("target", "_blank")
         .text(function(d) { return d; })
-
-        checkbox_column = row_entries.filter(function(d, i) {
-          return i == 24
-        })
-        checked_boxes = 0
-        checkbox_column.append("input").attr("class", "checkboxes").attr("name", "checks")
-          .attr("value", function(d, i) {return this.parentNode.parentNode.childNodes[1].childNodes[0].text}).attr("type", "checkbox").on("change", function(){
-          var slides = this.parentNode.parentNode.parentNode.getElementsByClassName("checkboxes")
-          if (this.checked){
-            checked_boxes += 1;
-          } else {
-            checked_boxes -= 1;
-          }
-          if (checked_boxes == 2) {
-            for (let box of slides) {
-              if (!box.checked) {
-                box.disabled = true
-              }
-            }
-          }
-          else if (checked_boxes < 2) {
-            for (let box of slides) {
-              if (box.disabled){
-                box.disabled = false
-              }
-            }
-          }
-        })
+        
         // exit
         rows.exit().remove();
       })
 ///////////
 /**  search functionality **/
-    // d3.select("#search3")
-    //   .on("keyup", function() { // filter according to key pressed 
+    d3.select("#search3")
+      .on("keyup", function() { // filter according to key pressed 
 
-    //     var searched_data = data,
-    //         text = this.value.trim();
+        var searched_data = data,
+            text = this.value.trim();
         
-    //     var searchResults = searched_data.map(function(r) {
+        var searchResults = searched_data.map(function(r) {
           
-    //       var regex = new RegExp("^" + text + ".*", "i");
-    //       // var regex = text;
-    //       console.log("text: ",regex);
-    //       if (regex.test(r.views)) { // if there are any results
-    //         return regex.exec(r.views)[0]; // return them to searchResults
-    //       } 
-    //     })
+          var regex = new RegExp("^" + text + ".*", "i");
+          // var regex = text;
+          console.log("text: ",regex);
+          if (regex.test(r.views)) { // if there are any results
+            return regex.exec(r.views)[0]; // return them to searchResults
+          } 
+        })
       
-    //   // filter blank entries from searchResults
-    //     searchResults = searchResults.filter(function(r){ 
-    //       // console.log("r: ",r);
-    //       return r != undefined;
-    //     })
+      // filter blank entries from searchResults
+        searchResults = searchResults.filter(function(r){ 
+          // console.log("r: ",r);
+          return r != undefined;
+        })
         
-    //     // filter dataset with searchResults
-    //     searched_data = searchResults.map(function(r) {
-    //        return data.filter(function(p) {
-    //         // console.log("p: ",p);
-    //         // console.log("p.views: ",p.views);
-    //         // console.log("r: ",r);
-    //         return p.views.indexOf(r) != -1;
-    //       })
-    //     })
+        // filter dataset with searchResults
+        searched_data = searchResults.map(function(r) {
+           return data.filter(function(p) {
+            // console.log("p: ",p);
+            // console.log("p.views: ",p.views);
+            // console.log("r: ",r);
+            return p.views.indexOf(r) != -1;
+          })
+        })
 
-    //     // flatten array 
-    // searched_data = [].concat.apply([], searched_data)
+        // flatten array 
+    searched_data = [].concat.apply([], searched_data)
         
-    //     // data bind with new data
-    // rows = table.select("tbody").selectAll("tr")
-    //   .data(searched_data, function(d){ return d.num; })
+        // data bind with new data
+    rows = table.select("tbody").selectAll("tr")
+      .data(searched_data, function(d){ return d.num; })
     
-    //     // enter the rows
-    //     rows.enter()
-    //      .append("tr");
+        // enter the rows
+        rows.enter()
+         .append("tr");
          
-    //     // enter td's in each row
-    //     row_entries = rows.selectAll("td")
-    //         .data(function(d) { 
-    //           var arr = [];
-    //           for (var k in d) {
-    //             if (d.hasOwnProperty(k)) {
-    //           arr.push(d[k]);
-    //             }
-    //           }
-    //           return [arr[0],arr[1],arr[2],arr[3],arr[4],arr[5],arr[6],arr[7],arr[8],arr[9],arr[10],arr[11],arr[12],arr[13],arr[14],arr[15],arr[16],arr[17],arr[18],arr[19],arr[20],arr[21],arr[22],arr[23]];
-    //         })
-    //       .enter()
-    //         .append("td") 
+        // enter td's in each row
+        row_entries = rows.selectAll("td")
+            .data(function(d) { 
+              var arr = [];
+              for (var k in d) {
+                if (d.hasOwnProperty(k)) {
+              arr.push(d[k]);
+                }
+              }
+              return [arr[0],arr[1],arr[2],arr[3],arr[4],arr[5],arr[6],arr[7],arr[8],arr[9],arr[10],arr[11],arr[12],arr[13],arr[14],arr[15],arr[16],arr[17],arr[18],arr[19],arr[20],arr[21],arr[22],arr[23]];
+            })
+          .enter()
+            .append("td") 
 
-    //     // draw row entries with no anchor 
-    //     row_entries_no_anchor = row_entries.filter(function(d, i) {
-    //       return i != 1  
-    //     })
-    //     row_entries_no_anchor.text(function(d) { return d; })
+        // draw row entries with no anchor 
+        row_entries_no_anchor = row_entries.filter(function(d) {
+          return (/https?:\/\//.test(d) == false)
+        })
+        row_entries_no_anchor.text(function(d) { return d; })
 
-    //     // draw row entries with anchor
-    //     row_entries_with_anchor = row_entries.filter(function(d, i) {
-    //       return i == 1  
-    //     })
-
-    //     row_entries_with_anchor
-    //       .append("a")
-    //       .attr("href", function(d) { return "/individual/" + d })
-    //     .text(function(d) { return d; })
+        // draw row entries with anchor
+        row_entries_with_anchor = row_entries.filter(function(d) {
+          return (/https?:\/\//.test(d) == true)  
+        })
+        row_entries_with_anchor
+          .append("a")
+          .attr("href", function(d) { return d; })
+          .attr("target", "_blank")
+        .text(function(d) { return d; })
         
-    //     // exit
-    //     rows.exit().remove();
-    //   })
+        // exit
+        rows.exit().remove();
+      })
 
 //////////
   /**  sort functionality **/
