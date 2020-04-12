@@ -1,23 +1,45 @@
 <html>  
   <head>
-    <title>Hello World</title>
+    <title>Compare Players</title>
     <link rel="stylesheet" type="text/css" href="/static/styles.css">
-	<script src="https://d3js.org/d3.v3.min.js"></script>
+  <script src="https://d3js.org/d3.v3.min.js"></script>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+  <style>
+  body {
+    background-color: #d1e5f0;
+    font: 14px sans-serif;
+  }
+  </style>
   </head>
   <body>
-    <form method="POST" action="/compare">
-      {% for result in players %}
-        <p>{{result}}</p>
-      {% endfor %}
-      <select name="season">
-      {% for season in seasons %}
-        <option value="{{season}}">{{season}}</option>
-      {% endfor %}
-      </select> <br/>
-      {% for stat in stats %}
-        {{stat}}<input type="checkbox" name="stats" value="{{stat}}">
-      {% endfor %}
-      <input type="submit" value="Compare These Stats">
+  </br>
+  <h2 align="center">Compare Players</h2>
+  <div class="container">
+    <div class="panel-body"><h5>{{players[0]}} Vs {{players[1]}}</h5></div>
+  
+      <form method="POST" action="/compare">
+        <label for="sel1">Season:</label>
+        <select class="selectpicker"  id="season" name="season">
+          {% for season in seasons %}
+            <option value="{{season}}">{{season}}</option>
+          {% endfor %}
+        </select>
+        <div class="mt-4 col-md-12">
+        </div>
+        <div class="container" id="cmp">
+          <div class="panel panel-default">
+            <div class="panel-body">
+              {% for stat in stats %}
+              <div class="checkbox">
+                <label><input type="checkbox" name="stats" value="{{stat}}"> {{stat}}</label>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+         <input class="btn btn-primary" type="submit" value="Compare These Stats">
+        </div>
     </form>
   </body>
 </html>  
