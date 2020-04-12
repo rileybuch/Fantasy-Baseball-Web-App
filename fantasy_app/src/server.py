@@ -14,7 +14,7 @@ app.secret_key = "abc"
 # use with docker image
 app.config['MYSQL_HOST'] = 'fantasy_baseball_db'
 # use with localhost
-# app.config['MYSQL_HOST'] = '127.0.0.1' 
+#app.config['MYSQL_HOST'] = '127.0.0.1' 
 app.config['MYSQL_USER'] = 'root'
 app.config['MYSQL_PASSWORD'] = 'root'
 app.config['MYSQL_DB'] = 'dbo'
@@ -203,7 +203,7 @@ def make_chart(Year, players, comparison_labels, player_type):
 
     # Add some text for labels, title and custom x-axis tick labels, etc.
 
-    ax.set_title('Player comparison')
+    #ax.set_title('Player comparison')
     ax.set_xticks(x)
     ax.set_xticklabels(comparison_labels)
     ax.set_yticks([])
