@@ -34,7 +34,11 @@ def home():
 @app.route("/batters", methods=['GET', 'POST'])
 def batters():
     session['player_type'] = 'Bat'
-    stats = ['G', 'HR', 'AB', 'PA', 'H', 'SB', 'CS', 'AVG', 'R', 'RBI']
+    return render_template('sorting_bat_modify.html')
+
+@app.route("/choose-batters", methods=['GET', 'POST'])
+def choose_batters():
+    stats = ['HR', 'TB', 'R', 'RBI', 'SB', 'AVG', 'OBP', 'SLG']
     if request.method == 'POST':
         players = request.form.getlist('checks')
         if len(players) == 2:
@@ -45,15 +49,14 @@ def batters():
             seasons = []
             for entry in data:
                 seasons.append(entry['Season'])
-            return render_template('data.html', players=players, seasons=seasons, stats= stats)
+            return render_template('data.html', players=players, seasons=seasons, stats=stats)
         else:
             return ('', 204)
-    return render_template('sorting_bat_modify.html')
 
 @app.route("/pitchers", methods=['GET', 'POST'])
 def pitchers():
     session['player_type'] = 'Pitch'
-    stats = ['W', 'L', 'ERA', 'WAR', 'G', 'GS', 'CG', 'ShO', 'SV', 'BS']
+    stats = ['W', 'L', 'ERA', 'SV', 'IP', 'HR', 'SO', 'WHIP']
     if request.method == 'POST':
         players = request.form.getlist('checks')
         if len(players) == 2:
@@ -72,7 +75,7 @@ def pitchers():
 @app.route("/battingdata")
 def get_bat_data():
     cur = mysql.connection.cursor()
-    cur.execute("SELECT Season views, Name id, Team created_on, Age title, G, AB, PA, H, `1B`, `2B`, `3B`, HR, R, RBI, BB, IBB, SO, HBP, SF, SH, GDP, SB, CS, AVG, ROW_NUMBER() OVER (ORDER BY Season) num FROM dbo.Batting WHERE Season = 2019 ORDER BY HR DESC")
+    cur.execute("SELECT Season, Name, HR, TB, R, RBI, SB, AVG, OBP, SLG, ROW_NUMBER() OVER (ORDER BY Season) num FROM dbo.Batting WHERE Season = 2020 ORDER BY HR DESC")
     data = cur.fetchall()
     response = Response(response=json.dumps(data, default=decimal_default), status=200, mimetype="application/json")
     return(response)
@@ -80,7 +83,7 @@ def get_bat_data():
 @app.route("/pitchingdata")
 def get_pitch_data():
     cur = mysql.connection.cursor()
-    cur.execute("SELECT Season views, Name id, Team created_on, Age title, W,L,ERA,WAR,G,GS,CG,ShO,SV,BS,IP,TBF,H,R,ER,HR,BB,Balls,Strikes,Pitches, ROW_NUMBER() OVER (ORDER BY Season) num FROM dbo.Pitching WHERE Season = 2019 ORDER BY W DESC")
+    cur.execute("SELECT Season, Name, pitcher_type, W, L, ERA, SV, IP, HR, SO, WHIP, ROW_NUMBER() OVER (ORDER BY Season) num FROM dbo.Pitching WHERE Season = 2020 ORDER BY W DESC")
     data = cur.fetchall()
     response = Response(response=json.dumps(data, default=decimal_default), status=200, mimetype="application/json")
     return(response)
@@ -97,11 +100,10 @@ def render_individual_pitch_stats(player_name):
 @app.route("/stat/<player_name>")
 def get_individual_stats(player_name):
     cur = mysql.connection.cursor()
-    print(session['player_type'])
     if session['player_type'] == 'Bat':
-        cur.execute("SELECT Season views, Name id, Team created_on, Age title, G, AB, PA, H, `1B`, `2B`, `3B`, HR, R, RBI, BB, IBB, SO, HBP, SF, SH, GDP, SB, CS, AVG, ROW_NUMBER() OVER (ORDER BY Season DESC) num FROM dbo.Batting WHERE Name = %s ORDER BY Season DESC", (player_name,))
+        cur.execute("SELECT Season, Name, HR, TB, R, RBI, SB, AVG, OBP, SLG, ROW_NUMBER() OVER (ORDER BY Season DESC) num FROM dbo.Batting WHERE Name = %s ORDER BY Season DESC", (player_name,))
     else:
-        cur.execute("SELECT Season views, Name id, Team created_on, Age title, W,L,ERA,WAR,G,GS,CG,ShO,SV,BS,IP,TBF,H,R,ER,HR,BB,Balls,Strikes,Pitches, ROW_NUMBER() OVER (ORDER BY Season) num FROM dbo.Pitching WHERE Name = %s ORDER BY Season DESC", (player_name,))
+        cur.execute("SELECT Season, Name, pitcher_type, W, L, ERA, SV, IP, HR, SO, WHIP, ROW_NUMBER() OVER (ORDER BY Season) num FROM dbo.Pitching WHERE Name = %s ORDER BY Season DESC", (player_name,))
     data = cur.fetchall()
     response = Response(response=json.dumps(data, default=decimal_default), status=200, mimetype="application/json")
     return(response)
@@ -166,9 +168,9 @@ def make_chart(Year, players, comparison_labels, player_type):
         col.append(item)
     col.append("")
     if player_type == 'Bat':
-        df = pd.read_sql("SELECT Season, Name, G, HR, AB, PA, H, SB, CS, AVG, R, RBI FROM dbo.Batting WHERE Name IN %s", mysql.connection, params=[tuple(players)])
+        df = pd.read_sql("SELECT Season, Name, HR, TB, R, RBI, SB, AVG, OBP, SLG FROM dbo.Batting WHERE Name IN %s", mysql.connection, params=[tuple(players)])
     else:
-        df = pd.read_sql("SELECT Season, Name, W, L, ERA, WAR, G, GS, CG, ShO, SV, BS FROM dbo.Pitching WHERE Name IN %s", mysql.connection, params=[tuple(players)])
+        df = pd.read_sql("SELECT Season, Name, W, L, ERA, SV, IP, HR, SO, WHIP FROM dbo.Pitching WHERE Name IN %s", mysql.connection, params=[tuple(players)])
 
     for i in range(len(df)):
         if (df['Name'][i] == player_first and df['Season'][i] == Year):
