@@ -56,6 +56,10 @@ def choose_batters():
 @app.route("/pitchers", methods=['GET', 'POST'])
 def pitchers():
     session['player_type'] = 'Pitch'
+    return render_template('sorting_pitch_modify.html')
+
+@app.route("/choose-pitchers", methods=['GET', 'POST'])
+def choose_pitchers():
     stats = ['W', 'L', 'ERA', 'SV', 'IP', 'HR', 'SO', 'WHIP']
     if request.method == 'POST':
         players = request.form.getlist('checks')
@@ -70,7 +74,6 @@ def pitchers():
             return render_template('data.html', players=players, seasons=seasons, stats=stats)
         else:
             return ('', 204)
-    return render_template('sorting_pitch_modify.html')
 
 @app.route("/battingdata")
 def get_bat_data():
