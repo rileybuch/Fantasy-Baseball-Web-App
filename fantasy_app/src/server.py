@@ -1,4 +1,4 @@
-from flask import Flask, flash, redirect, render_template, request, session, abort,send_from_directory,send_file,jsonify, Response
+from flask import Flask, flash, redirect, render_template, request, session, abort,send_from_directory,send_file,jsonify, Response, url_for
 from flask_mysqldb import MySQL
 import pandas as pd
 import matplotlib
@@ -49,9 +49,16 @@ def choose_batters():
             seasons = []
             for entry in data:
                 seasons.append(entry['Season'])
-            return render_template('data.html', players=players, seasons=seasons, stats=stats)
+            session['seasons'] = seasons
+            session['stats'] = stats
+            return redirect(url_for('choose_batter_stats'))
         else:
             return ('', 204)
+
+@app.route("/choose-batters-stats")
+def choose_batter_stats():
+    return render_template('data.html', players=session['player_list'], seasons=session['seasons'],
+        stats=session['stats'])
 
 @app.route("/pitchers", methods=['GET', 'POST'])
 def pitchers():
@@ -71,9 +78,16 @@ def choose_pitchers():
             seasons = []
             for entry in data:
                 seasons.append(entry['Season'])
-            return render_template('data.html', players=players, seasons=seasons, stats=stats)
+            session['seasons'] = seasons
+            session['stats'] = stats
+            return redirect(url_for('choose_pitcher_stats'))
         else:
             return ('', 204)
+
+@app.route("/choose-pitcher-stats")
+def choose_pitcher_stats():
+    return render_template('data.html', players=session['player_list'], seasons=session['seasons'],
+        stats=session['stats'])
 
 @app.route("/battingdata")
 def get_bat_data():
@@ -113,15 +127,19 @@ def get_individual_stats(player_name):
 
 @app.route("/compare", methods=['POST'])
 def compare_stats():
-    stats = request.form.getlist('stats')
-    season = request.form.get('season')
-    if len(stats) > 0:
-        fig = make_chart(int(season), session['player_list'], stats, session['player_type'])
-        encoded = fig_to_base64(fig)
-        encoded = encoded.decode('utf-8')
-        return render_template('index.html', image=encoded)
+    session['chart_stats'] = request.form.getlist('stats')
+    session['chart_season'] = request.form.get('season')
+    if len(session['chart_stats']) > 0:
+        return redirect(url_for('chart'))
     else:
         return ('', 204)
+
+@app.route("/chart")
+def chart():
+    fig = make_chart(int(session['chart_season']), session['player_list'], session['chart_stats'], session['player_type'])
+    encoded = fig_to_base64(fig)
+    encoded = encoded.decode('utf-8')
+    return render_template('index.html', image=encoded)
 
 def autolabel(rects, player_list, ax):
     """Attach a text label above each bar in *rects*, displaying its height."""
