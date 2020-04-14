@@ -96,8 +96,8 @@ tr:hover td { background-color: #edf8b1; }
 <script src="https://d3js.org/d3.v3.js"></script>
 <script>
 
-var column_names = ["Season","Name","Team","Age","W","L","ERA","WAR","G","GS","CG","ShO","SV","BS","IP","TBF","H","R","ER","HR","BB","Balls","Strikes","Pitches","Compare"];
-var clicks = {views: 0, title: 0, created_on: 0, url: 0, id: 0, g: 0, AB: 0,PA: 0,H: 0,onebase: 0,twobase: 0,threebase:0,HR:0};
+var column_names = ["Season","Name","Position","W", "L", "ERA", "SV", "IP", "HR", "SO", "WHIP","Compare"];
+var clicks = {Season: 0,Name: 0,Position: 0,W: 0, L: 0, ERA: 0, SV: 0, IP: 0, HR: 0, SO: 0, WHIP: 0};
 
 // draw the table
 d3.select("form").append("div")
@@ -123,19 +123,19 @@ d3.select(".SearchBar")
     .attr("type", "text")
     .attr("placeholder", "Search...");
 
-// second search bar
-d3.select("#FilterableTable").append("div")
-  .attr("class", "SearchBar2")
-  .append("p")
-    .attr("class", "SearchBar")
-    .text("Search By Team:");
+// // second search bar
+// d3.select("#FilterableTable").append("div")
+//   .attr("class", "SearchBar2")
+//   .append("p")
+//     .attr("class", "SearchBar")
+//     .text("Search By Team:");
 
-d3.select(".SearchBar2")
-  .append("input")
-    .attr("class", "SearchBar")
-    .attr("id", "search2")
-    .attr("type", "text")
-    .attr("placeholder", "Search...");
+// d3.select(".SearchBar2")
+//   .append("input")
+//     .attr("class", "SearchBar")
+//     .attr("id", "search2")
+//     .attr("type", "text")
+//     .attr("placeholder", "Search...");
 
 // third search bar
 d3.select("#FilterableTable").append("div")
@@ -191,7 +191,7 @@ d3.json("/pitchingdata", function(data) { // loading data from server
 		    arr.push(d[k]);
           }
         }
-        return [arr[0],arr[1],arr[2],arr[3],arr[4],arr[5],arr[6],arr[7],arr[8],arr[9],arr[10],arr[11],arr[12],arr[13],arr[14],arr[15],arr[16],arr[17],arr[18],arr[19],arr[20],arr[21],arr[22],arr[23], ""];
+        return [arr[0],arr[1],arr[2],arr[3],arr[4],arr[5],arr[6],arr[7],arr[8],arr[9], arr[10], ""];
       })
     .enter()
       .append("td")
@@ -213,7 +213,7 @@ d3.json("/pitchingdata", function(data) { // loading data from server
   .text(function(d) { return d; })
 
   checkbox_column = row_entries.filter(function(d, i) {
-    return i == 24
+    return i == 11
   })
 
   checkbox_column.append("input").attr("class", "checkboxes").attr("name", "checks")
@@ -288,7 +288,7 @@ d3.json("/pitchingdata", function(data) { // loading data from server
 		          arr.push(d[k]);
                 }
               }
-              return [arr[0],arr[1],arr[2],arr[3],arr[4],arr[5],arr[6],arr[7],arr[8],arr[9],arr[10],arr[11],arr[12],arr[13],arr[14],arr[15],arr[16],arr[17],arr[18],arr[19],arr[20],arr[21],arr[22],arr[23], ""];
+              return [arr[0],arr[1],arr[2],arr[3],arr[4],arr[5],arr[6],arr[7],arr[8],arr[9], arr[10], ""];
             })
           .enter()
             .append("td") 
@@ -310,7 +310,7 @@ d3.json("/pitchingdata", function(data) { // loading data from server
         .text(function(d) { return d; })
 
         checkbox_column = row_entries.filter(function(d, i) {
-          return i == 24
+          return i == 11
         })
         checkbox_column.append("input").attr("class", "checkboxes").attr("name", "checks")
           .attr("value", function(d, i) {return this.parentNode.parentNode.childNodes[1].childNodes[0].text}).attr("type", "checkbox").on("change", function(){
@@ -340,105 +340,105 @@ d3.json("/pitchingdata", function(data) { // loading data from server
       })
 
 
-  /**  search functionality **/
-    d3.select("#search2")
-      .on("keyup", function() { // filter according to key pressed 
+  // /**  search functionality **/
+  //   d3.select("#search2")
+  //     .on("keyup", function() { // filter according to key pressed 
 
-        var searched_data = data,
-            text = this.value.trim();
+  //       var searched_data = data,
+  //           text = this.value.trim();
         
-        var searchResults = searched_data.map(function(r) {
-          var regex = new RegExp("^" + text + ".*", "i");
-          // console.log("data: ",regex);
-          if (regex.test(r.created_on)) { // if there are any results
-            return regex.exec(r.created_on)[0]; // return them to searchResults
-          } 
-        })
+  //       var searchResults = searched_data.map(function(r) {
+  //         var regex = new RegExp("^" + text + ".*", "i");
+  //         // console.log("data: ",regex);
+  //         if (regex.test(r.created_on)) { // if there are any results
+  //           return regex.exec(r.created_on)[0]; // return them to searchResults
+  //         } 
+  //       })
       
-      // filter blank entries from searchResults
-        searchResults = searchResults.filter(function(r){ 
-          // console.log("r: ",r);
-          return r != undefined;
-        })
+  //     // filter blank entries from searchResults
+  //       searchResults = searchResults.filter(function(r){ 
+  //         // console.log("r: ",r);
+  //         return r != undefined;
+  //       })
         
-        // filter dataset with searchResults
-        searched_data = searchResults.map(function(r) {
-           return data.filter(function(p) {
-            return p.created_on.indexOf(r) != -1;
-          })
-        })
+  //       // filter dataset with searchResults
+  //       searched_data = searchResults.map(function(r) {
+  //          return data.filter(function(p) {
+  //           return p.created_on.indexOf(r) != -1;
+  //         })
+  //       })
 
-        // flatten array 
-    searched_data = [].concat.apply([], searched_data)
+  //       // flatten array 
+  //   searched_data = [].concat.apply([], searched_data)
         
-        // data bind with new data
-    rows = table.select("tbody").selectAll("tr")
-      .data(searched_data, function(d){ return d.num; })
+  //       // data bind with new data
+  //   rows = table.select("tbody").selectAll("tr")
+  //     .data(searched_data, function(d){ return d.num; })
     
-        // enter the rows
-        rows.enter()
-         .append("tr");
+  //       // enter the rows
+  //       rows.enter()
+  //        .append("tr");
          
-        // enter td's in each row
-        row_entries = rows.selectAll("td")
-            .data(function(d) { 
-              var arr = [];
-              for (var k in d) {
-                if (d.hasOwnProperty(k)) {
-              arr.push(d[k]);
-                }
-              }
-              return [arr[0],arr[1],arr[2],arr[3],arr[4],arr[5],arr[6],arr[7],arr[8],arr[9],arr[10],arr[11],arr[12],arr[13],arr[14],arr[15],arr[16],arr[17],arr[18],arr[19],arr[20],arr[21],arr[22],arr[23], ""];
-            })
-          .enter()
-            .append("td") 
+  //       // enter td's in each row
+  //       row_entries = rows.selectAll("td")
+  //           .data(function(d) { 
+  //             var arr = [];
+  //             for (var k in d) {
+  //               if (d.hasOwnProperty(k)) {
+  //             arr.push(d[k]);
+  //               }
+  //             }
+  //             return [arr[0],arr[1],arr[2],arr[3],arr[4],arr[5],arr[6],arr[7],arr[8],arr[9], arr[10], ""];
+  //           })
+  //         .enter()
+  //           .append("td") 
 
-        // draw row entries with no anchor 
-        row_entries_no_anchor = row_entries.filter(function(d, i) {
-          return i != 1  
-        })
-        row_entries_no_anchor.text(function(d) { return d; })
+  //       // draw row entries with no anchor 
+  //       row_entries_no_anchor = row_entries.filter(function(d, i) {
+  //         return i != 1  
+  //       })
+  //       row_entries_no_anchor.text(function(d) { return d; })
 
-        // draw row entries with anchor
-        row_entries_with_anchor = row_entries.filter(function(d, i) {
-          return i == 1  
-        })
+  //       // draw row entries with anchor
+  //       row_entries_with_anchor = row_entries.filter(function(d, i) {
+  //         return i == 1  
+  //       })
 
-        row_entries_with_anchor
-          .append("a")
-          .attr("href", function(d) { return "/individual_pitch/" + d })
-        .text(function(d) { return d; })
+  //       row_entries_with_anchor
+  //         .append("a")
+  //         .attr("href", function(d) { return "/individual_pitch/" + d })
+  //       .text(function(d) { return d; })
 
-        checkbox_column = row_entries.filter(function(d, i) {
-          return i == 24
-        })
-        checked_boxes = 0
-        checkbox_column.append("input").attr("class", "checkboxes").attr("name", "checks")
-          .attr("value", function(d, i) {return this.parentNode.parentNode.childNodes[1].childNodes[0].text}).attr("type", "checkbox").on("change", function(){
-          var slides = this.parentNode.parentNode.parentNode.getElementsByClassName("checkboxes")
-          if (this.checked){
-            checked_boxes += 1;
-          } else {
-            checked_boxes -= 1;
-          }
-          if (checked_boxes == 2) {
-            for (let box of slides) {
-              if (!box.checked) {
-                box.disabled = true
-              }
-            }
-          }
-          else if (checked_boxes < 2) {
-            for (let box of slides) {
-              if (box.disabled){
-                box.disabled = false
-              }
-            }
-          }
-        })
-        // exit
-        rows.exit().remove();
-      })
+  //       checkbox_column = row_entries.filter(function(d, i) {
+  //         return i == 11
+  //       })
+  //       checked_boxes = 0
+  //       checkbox_column.append("input").attr("class", "checkboxes").attr("name", "checks")
+  //         .attr("value", function(d, i) {return this.parentNode.parentNode.childNodes[1].childNodes[0].text}).attr("type", "checkbox").on("change", function(){
+  //         var slides = this.parentNode.parentNode.parentNode.getElementsByClassName("checkboxes")
+  //         if (this.checked){
+  //           checked_boxes += 1;
+  //         } else {
+  //           checked_boxes -= 1;
+  //         }
+  //         if (checked_boxes == 2) {
+  //           for (let box of slides) {
+  //             if (!box.checked) {
+  //               box.disabled = true
+  //             }
+  //           }
+  //         }
+  //         else if (checked_boxes < 2) {
+  //           for (let box of slides) {
+  //             if (box.disabled){
+  //               box.disabled = false
+  //             }
+  //           }
+  //         }
+  //       })
+  //       // exit
+  //       rows.exit().remove();
+  //     })
 ///////////
 /**  search functionality **/
     // d3.select("#search3")
@@ -522,15 +522,15 @@ d3.json("/pitchingdata", function(data) { // loading data from server
   /**  sort functionality **/
   headers
     .on("click", function(d) {
-      if (d == "Age") {
-        clicks.title++;
+      if (d == "Season") {
+        clicks.Season++;
         // even number of clicks
-        if (clicks.title % 2 == 0) {
+        if (clicks.Season % 2 == 0) {
           // sort ascending: numerically
           rows.sort(function(a,b) { 
-            if (+a.title < +b.title) { 
+            if (+a.Season < +b.Season) { 
               return -1; 
-            } else if (+a.title > +b.title) { 
+            } else if (+a.Season > +b.Season) { 
               return 1; 
             } else {
               return 0;
@@ -550,55 +550,55 @@ d3.json("/pitchingdata", function(data) { // loading data from server
           });
         }
       } 
-      if (d == "Season") {
-	    clicks.views++;
-        // even number of clicks
-        if (clicks.views % 2 == 0) {
-          // sort ascending: numerically
-          rows.sort(function(a,b) { 
-            if (+a.views < +b.views) { 
-              return -1; 
-            } else if (+a.views > +b.views) { 
-              return 1; 
-            } else {
-              return 0;
-            }
-          });
-        // odd number of clicks  
-        } else if (clicks.views % 2 != 0) { 
-          // sort descending: numerically
-          rows.sort(function(a,b) { 
-            if (+a.views < +b.views) { 
-              return 1; 
-            } else if (+a.views > +b.views) { 
-              return -1; 
-            } else {
-              return 0;
-            }
-          });
-        }
-      } 
+     //  if (d == "Season") {
+      // clicks.views++;
+     //    // even number of clicks
+     //    if (clicks.views % 2 == 0) {
+     //      // sort ascending: numerically
+     //      rows.sort(function(a,b) { 
+     //        if (+a.views < +b.views) { 
+     //          return -1; 
+     //        } else if (+a.views > +b.views) { 
+     //          return 1; 
+     //        } else {
+     //          return 0;
+     //        }
+     //      });
+     //    // odd number of clicks  
+     //    } else if (clicks.views % 2 != 0) { 
+     //      // sort descending: numerically
+     //      rows.sort(function(a,b) { 
+     //        if (+a.views < +b.views) { 
+     //          return 1; 
+     //        } else if (+a.views > +b.views) { 
+     //          return -1; 
+     //        } else {
+     //          return 0;
+     //        }
+     //      });
+     //    }
+     //  } 
       if (d == "Name") {
-        clicks.id++;
+        clicks.Name++;
         // even number of clicks
-        if (clicks.id % 2 == 0) {
+        if (clicks.Name % 2 == 0) {
           // sort ascending: alphabetically
           rows.sort(function(a,b) { 
-            if (a.id.toUpperCase() < b.id.toUpperCase()) { 
+            if (a.Name.toUpperCase() < b.Name.toUpperCase()) { 
               return -1; 
-            } else if (a.id.toUpperCase() > b.id.toUpperCase()) { 
+            } else if (a.Name.toUpperCase() > b.Name.toUpperCase()) { 
               return 1; 
             } else {
               return 0;
             }
           });
         // odd number of clicks  
-        } else if (clicks.id % 2 != 0) { 
+        } else if (clicks.Name % 2 != 0) { 
           // sort descending: alphabetically
           rows.sort(function(a,b) { 
-            if (a.id.toUpperCase() < b.id.toUpperCase()) { 
+            if (a.Name.toUpperCase() < b.Name.toUpperCase()) { 
               return 1; 
-            } else if (a.id.toUpperCase() > b.id.toUpperCase()) { 
+            } else if (a.Name.toUpperCase() > b.Name.toUpperCase()) { 
               return -1; 
             } else {
               return 0;
@@ -606,56 +606,56 @@ d3.json("/pitchingdata", function(data) { // loading data from server
           });
         }
       }
-      if (d == "Team") {
-        clicks.created_on++;
-        // even number of clicks
-        if (clicks.created_on % 2 == 0) {
-          // sort ascending: alphabetically
-          rows.sort(function(a,b) { 
-            if (a.created_on.toUpperCase() < b.created_on.toUpperCase()) { 
-              return -1; 
-            } else if (a.created_on.toUpperCase() > b.created_on.toUpperCase()) { 
-              return 1; 
-            } else {
-              return 0;
-            }
-          });
-        // odd number of clicks  
-        } else if (clicks.created_on % 2 != 0) { 
-          // sort descending: alphabetically
-          rows.sort(function(a,b) { 
-            if (a.created_on.toUpperCase() < b.created_on.toUpperCase()) { 
-              return 1; 
-            } else if (a.created_on.toUpperCase() > b.created_on.toUpperCase()) { 
-              return -1; 
-            } else {
-              return 0;
-            }
-          });
-        }
-      }
+      // if (d == "Team") {
+      //   clicks.created_on++;
+      //   // even number of clicks
+      //   if (clicks.created_on % 2 == 0) {
+      //     // sort ascending: alphabetically
+      //     rows.sort(function(a,b) { 
+      //       if (a.created_on.toUpperCase() < b.created_on.toUpperCase()) { 
+      //         return -1; 
+      //       } else if (a.created_on.toUpperCase() > b.created_on.toUpperCase()) { 
+      //         return 1; 
+      //       } else {
+      //         return 0;
+      //       }
+      //     });
+      //   // odd number of clicks  
+      //   } else if (clicks.created_on % 2 != 0) { 
+      //     // sort descending: alphabetically
+      //     rows.sort(function(a,b) { 
+      //       if (a.created_on.toUpperCase() < b.created_on.toUpperCase()) { 
+      //         return 1; 
+      //       } else if (a.created_on.toUpperCase() > b.created_on.toUpperCase()) { 
+      //         return -1; 
+      //       } else {
+      //         return 0;
+      //       }
+      //     });
+      //   }
+      // }
       //
-      if (d == "G") {
-      clicks.g++;
+      if (d == "W") {
+      clicks.W++;
         // even number of clicks
-        if (clicks.g % 2 == 0) {
-          // sort ascending: numerically
+        if (clicks.W % 2 == 0) {
+          // sort ascendinW: numerically
           rows.sort(function(a,b) { 
-            if (+a.G < +b.G) { 
+            if (+a.W < +b.W) { 
               return -1; 
-            } else if (+a.G > +b.G) { 
+            } else if (+a.W > +b.W) { 
               return 1; 
             } else {
               return 0;
             }
           });
         // odd number of clicks  
-        } else if (clicks.G % 2 != 0) { 
-          // sort descending: numerically
+        } else if (clicks.W % 2 != 0) { 
+          // sort descendinW: numerically
           rows.sort(function(a,b) { 
-            if (+a.G < +b.G) { 
+            if (+a.W < +b.W) { 
               return 1; 
-            } else if (+a.G > +b.G) { 
+            } else if (+a.W > +b.W) { 
               return -1; 
             } else {
               return 0;
@@ -665,27 +665,27 @@ d3.json("/pitchingdata", function(data) { // loading data from server
       }
       //       
       //
-      if (d == "AB") {
-      clicks.AB++;
+      if (d == "L") {
+      clicks.L++;
         // even number of clicks
-        if (clicks.AB % 2 == 0) {
+        if (clicks.L % 2 == 0) {
           // sort ascending: numerically
           rows.sort(function(a,b) { 
-            if (+a.AB < +b.AB) { 
+            if (+a.L < +b.L) { 
               return -1; 
-            } else if (+a.AB > +b.AB) { 
+            } else if (+a.L > +b.L) { 
               return 1; 
             } else {
               return 0;
             }
           });
         // odd number of clicks  
-        } else if (clicks.AB % 2 != 0) { 
+        } else if (clicks.L % 2 != 0) { 
           // sort descending: numerically
           rows.sort(function(a,b) { 
-            if (+a.AB < +b.AB) { 
+            if (+a.L < +b.L) { 
               return 1; 
-            } else if (+a.AB > +b.AB) { 
+            } else if (+a.L > +b.L) { 
               return -1; 
             } else {
               return 0;
@@ -695,27 +695,27 @@ d3.json("/pitchingdata", function(data) { // loading data from server
       }
       //   
       //
-      if (d == "PA") {
-      clicks.PA++;
+      if (d == "ERA") {
+      clicks.ERA++;
         // even number of clicks
-        if (clicks.PA % 2 == 0) {
+        if (clicks.ERA % 2 == 0) {
           // sort ascending: numerically
           rows.sort(function(a,b) { 
-            if (+a.PA < +b.PA) { 
+            if (+a.ERA < +b.ERA) { 
               return -1; 
-            } else if (+a.PA > +b.PA) { 
+            } else if (+a.ERA > +b.ERA) { 
               return 1; 
             } else {
               return 0;
             }
           });
         // odd number of clicks  
-        } else if (clicks.PA % 2 != 0) { 
+        } else if (clicks.ERA % 2 != 0) { 
           // sort descending: numerically
           rows.sort(function(a,b) { 
-            if (+a.PA < +b.PA) { 
+            if (+a.ERA < +b.ERA) { 
               return 1; 
-            } else if (+a.PA > +b.PA) { 
+            } else if (+a.ERA > +b.ERA) { 
               return -1; 
             } else {
               return 0;
@@ -725,27 +725,27 @@ d3.json("/pitchingdata", function(data) { // loading data from server
       }
       //     
             //
-      if (d == "H") {
-      clicks.H++;
+      if (d == "SV") {
+      clicks.SV++;
         // even number of clicks
-        if (clicks.H % 2 == 0) {
+        if (clicks.SV % 2 == 0) {
           // sort ascending: numerically
           rows.sort(function(a,b) { 
-            if (+a.H < +b.H) { 
+            if (+a.SV < +b.SV) { 
               return -1; 
-            } else if (+a.H > +b.H) { 
+            } else if (+a.SV > +b.SV) { 
               return 1; 
             } else {
               return 0;
             }
           });
         // odd number of clicks  
-        } else if (clicks.H % 2 != 0) { 
+        } else if (clicks.SV % 2 != 0) { 
           // sort descending: numerically
           rows.sort(function(a,b) { 
-            if (+a.H < +b.H) { 
+            if (+a.SV < +b.SV) { 
               return 1; 
-            } else if (+a.H > +b.H) { 
+            } else if (+a.SV > +b.SV) { 
               return -1; 
             } else {
               return 0;
@@ -755,6 +755,34 @@ d3.json("/pitchingdata", function(data) { // loading data from server
       }
       //  
       //
+      if (d == "IP") {
+      clicks.IP++;
+        // even number of clicks
+        if (clicks.IP % 2 == 0) {
+          // sort ascending: numerically
+          rows.sort(function(a,b) { 
+            if (+a.IP < +b.IP) { 
+              return -1; 
+            } else if (+a.IP > +b.IP) { 
+              return 1; 
+            } else {
+              return 0;
+            }
+          });
+        // odd number of clicks  
+        } else if (clicks.IP % 2 != 0) { 
+          // sort descending: numerically
+          rows.sort(function(a,b) { 
+            if (+a.IP < +b.IP) { 
+              return 1; 
+            } else if (+a.IP > +b.IP) { 
+              return -1; 
+            } else {
+              return 0;
+            }
+          });
+        }
+      }
       if (d == "HR") {
       clicks.HR++;
         // even number of clicks
@@ -776,6 +804,62 @@ d3.json("/pitchingdata", function(data) { // loading data from server
             if (+a.HR < +b.HR) { 
               return 1; 
             } else if (+a.HR > +b.HR) { 
+              return -1; 
+            } else {
+              return 0;
+            }
+          });
+        }
+      }
+      if (d == "SO") {
+      clicks.SO++;
+        // even number of clicks
+        if (clicks.SO % 2 == 0) {
+          // sort ascending: numerically
+          rows.sort(function(a,b) { 
+            if (+a.SO < +b.SO) { 
+              return -1; 
+            } else if (+a.SO > +b.SO) { 
+              return 1; 
+            } else {
+              return 0;
+            }
+          });
+        // odd number of clicks  
+        } else if (clicks.SO % 2 != 0) { 
+          // sort descending: numerically
+          rows.sort(function(a,b) { 
+            if (+a.SO < +b.SO) { 
+              return 1; 
+            } else if (+a.SO > +b.SO) { 
+              return -1; 
+            } else {
+              return 0;
+            }
+          });
+        }
+      }
+      if (d == "WHIP") {
+      clicks.WHIP++;
+        // even number of clicks
+        if (clicks.WHIP % 2 == 0) {
+          // sort ascending: numerically
+          rows.sort(function(a,b) { 
+            if (+a.WHIP < +b.WHIP) { 
+              return -1; 
+            } else if (+a.WHIP > +b.WHIP) { 
+              return 1; 
+            } else {
+              return 0;
+            }
+          });
+        // odd number of clicks  
+        } else if (clicks.WHIP % 2 != 0) { 
+          // sort descending: numerically
+          rows.sort(function(a,b) { 
+            if (+a.WHIP < +b.WHIP) { 
+              return 1; 
+            } else if (+a.WHIP > +b.WHIP) { 
               return -1; 
             } else {
               return 0;
