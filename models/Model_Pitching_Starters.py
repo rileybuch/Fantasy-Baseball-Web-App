@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[2]:
+# In[1]:
 
 
 import pandas as pd
@@ -14,7 +14,7 @@ from bokeh import io
 from bokeh.layouts import column, gridplot
 
 
-# In[4]:
+# In[2]:
 
 
 def create_res_plot(y_model, y_true, name='some text'):
@@ -37,7 +37,7 @@ def create_res_plot(y_model, y_true, name='some text'):
     return p
 
 
-# In[5]:
+# In[3]:
 
 
 def create_dev_plot(yrange, training_score, testing_score, name='Deviance Plot'):
@@ -47,7 +47,7 @@ def create_dev_plot(yrange, training_score, testing_score, name='Deviance Plot')
     return p
 
 
-# In[6]:
+# In[4]:
 
 
 def create_feat_imp_plot(sorted_names, sorted_importance, name='Feature Importance'):
@@ -56,7 +56,7 @@ def create_feat_imp_plot(sorted_names, sorted_importance, name='Feature Importan
     return p
 
 
-# In[7]:
+# In[5]:
 
 
 def model_gbr(df, dependent_var, not_features, params, train_pct=0.7):
@@ -110,7 +110,7 @@ def model_gbr(df, dependent_var, not_features, params, train_pct=0.7):
     return regressor, plots
 
 
-# In[8]:
+# In[6]:
 
 
 def model_gbr_norm(df, dependent_var, not_features, train_pct=0.7, n_estimators=2000, max_depth=3, learning_rate=0.05,
@@ -172,7 +172,7 @@ def model_gbr_norm(df, dependent_var, not_features, train_pct=0.7, n_estimators=
     return regressor, plots
 
 
-# In[9]:
+# In[7]:
 
 
 def filter_data(input_file):
@@ -186,11 +186,14 @@ def filter_data(input_file):
     # drop any columns you don't want here
     cols_to_remove = ['Age Rng']
     filter_df.drop(columns=cols_to_remove, inplace=True)
+    
+    # filter out non-starters
+    filter_df = filter_df[filter_df["GS"] >= 3]
 
     return filter_df
 
 
-# In[34]:
+# In[8]:
 
 
 def filter_norm_data(input_file):
@@ -204,6 +207,9 @@ def filter_norm_data(input_file):
     # drop any columns you don't want here
     cols_to_remove = ['Age Rng']
     filter_df.drop(columns=cols_to_remove, inplace=True)
+    
+    # filter out non-starters
+    filter_df = filter_df[filter_df["GS"] >= 3]
 
     stats_to_norm = ['W', 'L', 'SV', 'SO', 'IP', 'HR', 'CG', 'ShO', 'H', 'R', 'ER', 'BB', 'IBB']
     for stat in stats_to_norm:
@@ -213,7 +219,7 @@ def filter_norm_data(input_file):
     return filter_df
 
 
-# In[35]:
+# In[9]:
 
 
 def model_pitching(hyperparams, csv_file='../pitching_data_1996_2019.csv'):
@@ -231,6 +237,7 @@ def model_pitching(hyperparams, csv_file='../pitching_data_1996_2019.csv'):
 
         # model and predict quality
         models[dep_var], plots[dep_var] = model_gbr(filter_df, dep_var, not_features_list, hyperparams)
+        
 
     bokeh_output = r'/Users/rmbuch/Desktop/fantasy_baseball/output.html'
     io.output_file(bokeh_output)
@@ -240,9 +247,12 @@ def model_pitching(hyperparams, csv_file='../pitching_data_1996_2019.csv'):
             figures.append(plots[var][i])
 
     show(gridplot(figures, ncols=3, plot_height=300, merge_tools=False))
+    
+    return filter_df, models
+    
 
 
-# In[36]:
+# In[10]:
 
 
 def model_pitching_normalized(hyperparams, csv_file='../pitching_data_1996_2019.csv'):
@@ -268,9 +278,38 @@ def model_pitching_normalized(hyperparams, csv_file='../pitching_data_1996_2019.
             figures.append(plots[var][i])
 
     show(gridplot(figures, ncols=3, plot_height=300, merge_tools=False))
+    
+    return filter_df, models
 
 
-# In[37]:
+# In[11]:
+
+
+def make_predictions(df, models, games_per_season):
+    pred_n2_df = filter_df[filter_df.Season == 2018]
+    pred_n1_df = filter_df[filter_df.Season == 2019]
+    combined_df = pred_n2_df.merge(pred_n1_df, on='Name', suffixes=('_n2', '_n1'))
+    combined_df.reset_index(inplace=True, drop=True)
+    X = combined_df.drop(columns=['Name', 'Season_n1', 'Team_n1', 'Season_n2', 'Team_n2'])
+    pred_df = combined_df[['Name', 'key_mlbam_n1', 'Age_n1']].copy()
+    pred_df['Season'] = 2020
+    pred_df['Age_n1'] = pred_df.apply(lambda row: int(row['Age_n1'] + 1), axis = 1)     # increase player's age by 1
+    pred_df.rename(columns={'key_mlbam_n1': 'key_mlbam', 'Age_n1': 'Age'}, inplace=True)
+    
+    # make predictions for 2020 based on 2019
+    for stat, model in models.items():
+        print(f'making {stat} predictions for 2020')
+        preds = model.predict(X)
+        pred_df[stat] = preds
+        if stat.endswith('pG'):
+            pred_df[f'{stat[:-2]}'] = pred_df.apply(lambda row: int(row[stat] * games_per_season), axis=1)
+            pred_df.drop(columns=[stat], inplace=True)
+
+        
+    return pred_df
+
+
+# In[12]:
 
 
 if __name__ == "__main__":
@@ -281,10 +320,30 @@ if __name__ == "__main__":
               'min_samples_leaf': 1}
 
     # this models the 8 stats, based off the previous year
-    model_pitching(params, pitching_data)
+    filter_df, models = model_pitching(params, pitching_data)
 
-    # this models the 8 stats by game (except ERA and WHIP), based off the previous year
-    model_pitching_normalized(params, pitching_data)
+    # this models the 8 stats by game, normalized (except ERA and WHIP), based off the previous year
+    #norm_filter_df, norm_models = model_pitching_normalized(params, pitching_data)
+    
+    # convert predict the 2020 season and merge it with previous data
+    games = 32
+    pred_df = make_predictions(filter_df, models, games)
+    #norm_pred_df = make_predictions(norm_filter_df, norm_models, games)
+    
+    # change predictions for saves to 0 for starters
+    pred_df['SV'] = 0
+    #norm_pred_df['SV'] = 0
+
+    original_df = filter_data(pitching_data)
+    full_df = original_df.append(pred_df, sort=False)
+    #full_df_norm = original_df.append(norm_pred_df, sort=False)
+
+    full_df.to_csv('../pitching_data_starters_1996_2020.csv', index=False)
+    #full_df_norm.to_csv('../pitching_data_norm_starters_1996_2020.csv', index=False)
+
+    pass
+   
+    
 
 
 # In[ ]:
