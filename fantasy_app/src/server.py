@@ -22,6 +22,9 @@ app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 
 mysql = MySQL(app)
 
+pitch_stats = ['W', 'L', 'ERA', 'SV', 'IP', 'HR', 'SO', 'WHIP']
+bat_stats = ['HR', 'TB', 'R', 'RBI', 'SB', 'AVG', 'OBP', 'SLG']
+
 def decimal_default(obj):
     if isinstance(obj, decimal.Decimal):
         return float(obj)
@@ -33,12 +36,24 @@ def home():
 
 @app.route("/batters", methods=['GET', 'POST'])
 def batters():
-    session['player_type'] = 'Bat'
-    return render_template('sorting_bat_modify.html')
+    session['player_type'] = 'Bat' 
+    if request.method == 'POST':
+        session['risk'] = request.form.get('risk')
+        session['rank_stats'] = request.form.getlist('rank_stats')
+    else:
+        session['risk'] = 'M'
+        session['rank_stats'] = ['HR', 'RBI', 'AVG', 'SB', 'R']
+    if len(session['rank_stats']) >= 4:
+        return redirect(url_for('show_batter_data'))
+    else:
+        return ('', 204)
+
+@app.route("/batters-data")
+def show_batter_data():    
+    return render_template('sorting_bat_modify.html', stats=session['rank_stats'], risk=session['risk'])
 
 @app.route("/choose-batters", methods=['GET', 'POST'])
 def choose_batters():
-    stats = ['HR', 'TB', 'R', 'RBI', 'SB', 'AVG', 'OBP', 'SLG']
     if request.method == 'POST':
         players = request.form.getlist('checks')
         if len(players) == 2:
@@ -50,7 +65,6 @@ def choose_batters():
             for entry in data:
                 seasons.append(entry['Season'])
             session['seasons'] = seasons
-            session['stats'] = stats
             return redirect(url_for('choose_batter_stats'))
         else:
             return ('', 204)
@@ -58,16 +72,29 @@ def choose_batters():
 @app.route("/choose-batters-stats")
 def choose_batter_stats():
     return render_template('data.html', players=session['player_list'], seasons=session['seasons'],
-        stats=session['stats'])
+        stats=bat_stats)
 
 @app.route("/pitchers", methods=['GET', 'POST'])
 def pitchers():
-    session['player_type'] = 'Pitch'
-    return render_template('sorting_pitch_modify.html')
+    session['player_type'] = 'Pitch' 
+    if request.method == 'POST':
+        session['risk'] = request.form.get('risk')
+        session['rank_stats'] = request.form.getlist('rank_stats')
+    else:
+        session['risk'] = 'M'
+        session['rank_stats'] = ['W', 'ERA', 'WHIP', 'SO']
+    if len(session['rank_stats']) >= 4:
+        return redirect(url_for('show_pitcher_data'))
+    else:
+        return ('', 204)
+
+
+@app.route("/pitchers-data")
+def show_pitcher_data():    
+    return render_template('sorting_pitch_modify.html', stats=session['rank_stats'], risk=session['risk'])
 
 @app.route("/choose-pitchers", methods=['GET', 'POST'])
 def choose_pitchers():
-    stats = ['W', 'L', 'ERA', 'SV', 'IP', 'HR', 'SO', 'WHIP']
     if request.method == 'POST':
         players = request.form.getlist('checks')
         if len(players) == 2:
@@ -79,7 +106,6 @@ def choose_pitchers():
             for entry in data:
                 seasons.append(entry['Season'])
             session['seasons'] = seasons
-            session['stats'] = stats
             return redirect(url_for('choose_pitcher_stats'))
         else:
             return ('', 204)
@@ -87,20 +113,56 @@ def choose_pitchers():
 @app.route("/choose-pitcher-stats")
 def choose_pitcher_stats():
     return render_template('data.html', players=session['player_list'], seasons=session['seasons'],
-        stats=session['stats'])
+        stats=pitch_stats)
 
 @app.route("/battingdata")
 def get_bat_data():
+    stat_len = len(session['rank_stats'])
+    if session['risk'] == 'M':
+        column_rank = [stat + 'rM' for stat in session['rank_stats']]
+        rank_add = ' + '.join(column_rank)
+        value_columns = ','.join(bat_stats)
+    elif session['risk'] == 'L':
+        column_rank = [stat + 'rL' for stat in session['rank_stats']]
+        column_value = [stat + 'vL ' + stat for stat in bat_stats]
+        rank_add = ' + '.join(column_rank)
+        value_columns = ','.join(column_value)
+    else:
+        column_rank = [stat + 'rH' for stat in session['rank_stats']]
+        column_value = [stat + 'vH ' + stat for stat in bat_stats]
+        rank_add = ' + '.join(column_rank)
+        value_columns = ','.join(column_value)
+
+    average = f'(({rank_add}) / {stat_len})'
     cur = mysql.connection.cursor()
-    cur.execute("SELECT Season, Name, HR, TB, R, RBI, SB, AVG, OBP, SLG, ROW_NUMBER() OVER (ORDER BY Season) num FROM dbo.Batting WHERE Season = 2020 ORDER BY HR DESC")
+    query = f'SELECT Season, Name, {value_columns}, ROW_NUMBER() OVER (ORDER BY {average}) num, ROW_NUMBER() OVER (ORDER BY {average}) "Rank" FROM dbo.Batting WHERE Season = 2020 ORDER BY {average}'
+    cur.execute(query)
     data = cur.fetchall()
     response = Response(response=json.dumps(data, default=decimal_default), status=200, mimetype="application/json")
     return(response)
 
 @app.route("/pitchingdata")
 def get_pitch_data():
+    stat_len = len(session['rank_stats'])
+    if session['risk'] == 'M':
+        column_rank = [stat + 'rM' for stat in session['rank_stats']]
+        rank_add = ' + '.join(column_rank)
+        value_columns = ','.join(pitch_stats)
+    elif session['risk'] == 'L':
+        column_rank = [stat + 'rL' for stat in session['rank_stats']]
+        column_value = [stat + 'vL ' + stat for stat in pitch_stats]
+        rank_add = ' + '.join(column_rank)
+        value_columns = ','.join(column_value)
+    else:
+        column_rank = [stat + 'rH' for stat in session['rank_stats']]
+        column_value = [stat + 'vH ' + stat for stat in pitch_stats]
+        rank_add = ' + '.join(column_rank)
+        value_columns = ','.join(column_value)
+
+    average = f'(({rank_add}) / {stat_len})'
     cur = mysql.connection.cursor()
-    cur.execute("SELECT Season, Name, pitcher_type, W, L, ERA, SV, IP, HR, SO, WHIP, ROW_NUMBER() OVER (ORDER BY Season) num FROM dbo.Pitching WHERE Season = 2020 ORDER BY W DESC")
+    query = f'SELECT Season, Name, pitcher_type Position, {value_columns}, ROW_NUMBER() OVER (ORDER BY {average}) num, ROW_NUMBER() OVER (ORDER BY {average}) "Rank" FROM dbo.Pitching WHERE Season = 2020 ORDER BY {average}'
+    cur.execute(query)
     data = cur.fetchall()
     response = Response(response=json.dumps(data, default=decimal_default), status=200, mimetype="application/json")
     return(response)
