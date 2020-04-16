@@ -99,6 +99,11 @@ tr:hover td { background-color: #edf8b1; }
       <option value='L' {{'selected' if 'L' == risk}}>Low</option>
       <option value='H' {{'selected' if 'H' == risk}}>High</option>
     </select>
+    <label for="position">Position:</label>
+    <select name="position">
+      <option value='Starter' {{'selected' if 'Starter' == position}}>Starter</option>
+      <option value='Reliever' {{'selected' if 'Reliever' == position}}>Reliever</option>
+    </select>
     <br><br>
     <label for="rank_stats">Choose stats to rank players by (Choose at least 4):</label><br>
     W<input type="checkbox" name="rank_stats" value="W" {{'checked' if 'W' in stats}}>

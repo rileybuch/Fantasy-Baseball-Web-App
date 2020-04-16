@@ -80,9 +80,11 @@ def pitchers():
     if request.method == 'POST':
         session['risk'] = request.form.get('risk')
         session['rank_stats'] = request.form.getlist('rank_stats')
+        session['pitch_position'] = request.form.get('position')
     else:
         session['risk'] = 'M'
         session['rank_stats'] = ['W', 'ERA', 'WHIP', 'SO']
+        session['pitch_position'] = 'Starter'
     if len(session['rank_stats']) >= 4:
         return redirect(url_for('show_pitcher_data'))
     else:
@@ -160,8 +162,9 @@ def get_pitch_data():
         value_columns = ','.join(column_value)
 
     average = f'(({rank_add}) / {stat_len})'
+    position = session['pitch_position']
     cur = mysql.connection.cursor()
-    query = f'SELECT Season, Name, pitcher_type Position, {value_columns}, ROW_NUMBER() OVER (ORDER BY {average}) num, ROW_NUMBER() OVER (ORDER BY {average}) "Rank" FROM dbo.Pitching WHERE Season = 2020 ORDER BY {average}'
+    query = f'SELECT Season, Name, pitcher_type Position, {value_columns}, ROW_NUMBER() OVER (ORDER BY {average}) num, ROW_NUMBER() OVER (ORDER BY {average}) "Rank" FROM dbo.Pitching WHERE Season = 2020 AND pitcher_type = \'{position}\' ORDER BY {average}'
     cur.execute(query)
     data = cur.fetchall()
     response = Response(response=json.dumps(data, default=decimal_default), status=200, mimetype="application/json")
