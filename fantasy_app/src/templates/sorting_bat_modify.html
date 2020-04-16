@@ -1,5 +1,9 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
+<head>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+</head>
 <style>
 body {
   background-color: #d1e5f0;
@@ -92,7 +96,9 @@ tr:hover td { background-color: #edf8b1; }
 </style>
 <body>
   <a href="/"><img src="/static/home.jfif" width="50" height="50"></a>
-  <h1>MLB Batting Data 2020 Projections</h1>
+  <h2 align="center">MLB Batting Data 2020 Projections</h2>
+  <div class="container">
+    <div class="panel-body">
   <form method="POST" action="/batters">
     <label for="risk">Choose your risk tolerance:</label>
     <select name="risk">
@@ -113,12 +119,14 @@ tr:hover td { background-color: #edf8b1; }
     <br>
     <input type="submit" value="Rank Players">
   </form>
+    </div>
+    </div>
   <form method="POST" id="batters" action="/choose-batters"></form>
 </body>
 <script src="https://d3js.org/d3.v3.js"></script>
 <script>
 
-var column_names = ["Season","Name","HR", "TB", "R", "RBI", "SB", "AVG", "OBP", "SLG","Rank","Compare"];
+var column_names = ["Season","Name","HR", "TB", "R", "RBI", "SB", "AVG", "OBP", "SLG","Rank","Compare", " "];
 var clicks = {Season: 0,Name: 0,HR: 0, TB: 0, R: 0, RBI: 0, SB: 0, AVG: 0, OBP: 0, SLG: 0, Rank:0};
 
 // draw the table
@@ -160,12 +168,12 @@ d3.select("#batters").append("div")
 //     .attr("placeholder", "Search...");
 
 // third search bar
-d3.select("#FilterableTable").append("div")
-  .attr("class", "SearchBar3")
-  .append("input")
-    // .attr("class", "SearchBar")
-    .attr("type", "submit")
-    .attr("value", "Compare Players")
+// d3.select("#FilterableTable").append("div")
+//   .attr("class", "SearchBar3")
+//   .append("input")
+//     // .attr("class", "SearchBar")
+//     .attr("type", "submit")
+//     .attr("value", "Compare Players")
 
 
 // d3.select(".SearchBar3")
@@ -213,7 +221,7 @@ d3.json("/battingdata", function(data) { // loading data from server
 		    arr.push(d[k]);
           }
         }
-        return [arr[0],arr[1],arr[2],arr[3],arr[4],arr[5],arr[6],arr[7],arr[8],arr[9],arr[10], ""];
+        return [arr[0],arr[1],arr[2],arr[3],arr[4],arr[5],arr[6],arr[7],arr[8],arr[9],arr[10], "", ""];
       })
     .enter()
       .append("td")
@@ -261,6 +269,16 @@ d3.json("/battingdata", function(data) { // loading data from server
       }
     }  
   })
+
+
+  button_column = row_entries.filter(function(d, i) {
+    return i == 12
+  })
+
+  button_column.append("input")
+    // .attr("class", "SearchBar")
+    .attr("type", "submit")
+    .attr("value", "Compare Players")
 
     
   // /**  search functionality **/
