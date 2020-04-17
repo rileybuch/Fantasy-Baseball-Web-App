@@ -99,29 +99,35 @@ tr:hover td { background-color: #edf8b1; }
   <h2 align="center">MLB Batting Data 2020 Projections</h2>
   <div class="container">
     <div class="panel-body">
-  <form method="POST" action="/batters">
-    <label for="risk">Choose your risk tolerance:</label>
-    <select name="risk">
-      <option value='M' {{'selected' if 'M' == risk}}>Medium</option>
-      <option value='L' {{'selected' if 'L' == risk}}>Low</option>
-      <option value='H' {{'selected' if 'H' == risk}}>High</option>
-    </select>
-    <br><br>
-    <label for="rank_stats">Choose stats to rank players by (Choose at least 4):</label><br>
-    HR<input type="checkbox" name="rank_stats" value="HR" {{'checked' if 'HR' in stats}}>
-    TB<input type="checkbox" name="rank_stats" value="TB" {{'checked' if 'TB' in stats}}>
-    R<input type="checkbox" name="rank_stats" value="R" {{'checked' if 'R' in stats}}>
-    RBI<input type="checkbox" name="rank_stats" value="RBI" {{'checked' if 'RBI' in stats}}>
-    SB<input type="checkbox" name="rank_stats" value="SB" {{'checked' if 'SB' in stats}}>
-    AVG<input type="checkbox" name="rank_stats" value="AVG" {{'checked' if 'AVG' in stats}}>
-    OBP<input type="checkbox" name="rank_stats" value="OBP" {{'checked' if 'OBP' in stats}}>
-    SLG<input type="checkbox" name="rank_stats" value="SLG" {{'checked' if 'SLG' in stats}}>
-    <br>
-    <input type="submit" value="Rank Players">
-  </form>
+      <form method="POST" action="/batters">
+        <label for="risk">Choose your risk tolerance:</label>
+        <select name="risk">
+          <option value='M' {{'selected' if 'M' == risk}}>Medium</option>
+          <option value='L' {{'selected' if 'L' == risk}}>Low</option>
+          <option value='H' {{'selected' if 'H' == risk}}>High</option>
+        </select>
+        <br><br>
+        <label for="rank_stats">Choose stats to rank players by (Choose at least 4):</label><br>
+        <div class="checkbox">
+          HR <input type="checkbox" name="rank_stats" value="HR" {{'checked' if 'HR' in stats}}>
+          &nbsp;&nbsp;&nbsp;TB <input type="checkbox" name="rank_stats" value="TB" {{'checked' if 'TB' in stats}}>
+          &nbsp;&nbsp;&nbsp;R <input type="checkbox" name="rank_stats" value="R" {{'checked' if 'R' in stats}}>
+          &nbsp;&nbsp;&nbsp;RBI <input type="checkbox" name="rank_stats" value="RBI" {{'checked' if 'RBI' in stats}}>
+          &nbsp;&nbsp;&nbsp;SB <input type="checkbox" name="rank_stats" value="SB" {{'checked' if 'SB' in stats}}>
+          &nbsp;&nbsp;&nbsp;AVG <input type="checkbox" name="rank_stats" value="AVG" {{'checked' if 'AVG' in stats}}>
+          &nbsp;&nbsp;&nbsp;OBP <input type="checkbox" name="rank_stats" value="OBP" {{'checked' if 'OBP' in stats}}>
+          &nbsp;&nbsp;&nbsp;SLG <input type="checkbox" name="rank_stats" value="SLG" {{'checked' if 'SLG' in stats}}>
+          &nbsp;&nbsp; &nbsp;&nbsp;<input type="submit" value="Rank Players">
+        </div>
+       
+      </form>
     </div>
-    </div>
-  <form method="POST" id="batters" action="/choose-batters"></form>
+  </div>
+  <div class="container">
+    <div class="panel-body">
+      <form method="POST" id="batters" action="/choose-batters"></form>
+   </div>
+  </div>
 </body>
 <script src="https://d3js.org/d3.v3.js"></script>
 <script>
