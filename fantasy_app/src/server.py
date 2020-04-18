@@ -230,7 +230,7 @@ def autolabel(rects, player_list, ax):
 
 # # #make historical progression chart
 def make_chart2(player, stat, player_type):
-#     matplotlib.pyplot.switch_backend('Agg')
+    matplotlib.pyplot.switch_backend('Agg')
 
     # #stat is an input from the radio button
     comparison_labels = ['G']
