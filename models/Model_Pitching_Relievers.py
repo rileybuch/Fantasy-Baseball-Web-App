@@ -313,7 +313,7 @@ def make_predictions(df, models, games_per_season):
 
 
 if __name__ == "__main__":
-    pitching_data = r'pitching_data_1996_2019.csv'
+    pitching_data = r'../pitching_data_1996_2019.csv'
 
     # this models the 5 standard stats based off of the previous year
     params = {'n_estimators': 1000, 'max_depth': 3, 'min_samples_split': 2, 'learning_rate': 0.01,

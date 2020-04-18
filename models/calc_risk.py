@@ -38,7 +38,7 @@ def calc_risk(df, cols_to_keep, cols_to_expand):
 
 if __name__ == "__main__":
     # BATTERS
-    cols_to_keep = ['Season', 'Name', 'Team', 'HR', 'TB', 'R', 'RBI', 'SB', 'AVG', 'OBP', 'SLG', 'key_mlbam',
+    cols_to_keep = ['Season', 'Name', 'Team', 'G', 'HR', 'TB', 'R', 'RBI', 'SB', 'AVG', 'OBP', 'SLG', 'key_mlbam',
                     'overall_risk']
     cols_to_expand = {'HR': False, 'TB': False, 'R': False, 'RBI': False, 'SB': False, 'AVG': False, 'OBP': False,
                       'SLG': False}
@@ -47,7 +47,7 @@ if __name__ == "__main__":
     new_batting_df.to_csv('../batting_1996_2020_risk_calc.csv', index=False)
 
     # PITCHERS
-    cols_to_keep = ['Season', 'Name', 'Team', 'Age', 'W', 'L', 'ERA', 'SV', 'IP', 'HR', 'SO', 'WHIP', 'key_mlbam',
+    cols_to_keep = ['Season', 'Name', 'Team', 'Age', 'G', 'W', 'L', 'ERA', 'SV', 'IP', 'HR', 'SO', 'WHIP', 'key_mlbam',
                     'overall_risk']
     cols_to_expand = {'W': False, 'L': True, 'ERA': True, 'SV': False, 'IP': False, 'HR': True, 'SO': False,
                       'WHIP': True}
