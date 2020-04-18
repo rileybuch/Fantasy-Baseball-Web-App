@@ -19,6 +19,9 @@ def autolabel(rects, player_list):
                     ha='center', va='bottom')
         i+= 1
 
+
+
+
 # --------------SETTINGS--------------------------------
 # user select the year & players to compare
 player = 'Mike Trout'
@@ -46,7 +49,7 @@ for i in range(len(cats)):
 # print(comparison_labels)
 # labels = ['HR', 'G', 'AVG', 'SB', 'H', 'R']
 
-col = ["views", "id"]
+col = ["Name", "Season"]
 for item in comparison_labels:
 	col.append(item)
 # print(col)
@@ -56,13 +59,13 @@ y1 = []
 y2 = []
 
 
-reader = csv.reader(open('batting_test_modify.csv'))
-df = pandas.read_csv('batting_test_modify.csv', usecols = lambda column : column in col)
-# print(df)
+reader = csv.reader(open('batting_1996_2020_risk_calc.csv'))
+df = pandas.read_csv('batting_1996_2020_risk_calc.csv', usecols = lambda column : column in col)
+print(df)
 
 for i in range(len(df)):
-	if (df['id'][i] == player):
-		x.append(df['views'][i])
+	if (df['Name'][i] == player):
+		x.append(df['Season'][i])
 		y1.append(df[comparison_labels[0]][i])	
 		y2.append(df[comparison_labels[1]][i])
 
