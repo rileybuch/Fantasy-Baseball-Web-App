@@ -7,6 +7,8 @@ import numpy as np
 import json, decimal
 import io
 import base64
+from IPython.display import set_matplotlib_formats
+import random
 
 app = Flask(__name__)
 app.secret_key = "abc" 
@@ -74,6 +76,16 @@ def choose_batter_stats():
     return render_template('data.html', players=session['player_list'], seasons=session['seasons'],
         stats=bat_stats)
 
+#----------
+@app.route("/batters_image")
+def image_batters():
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT Name, key_mlbam FROM dbo.Batting")
+    data = cur.fetchall()
+    response = Response(response=json.dumps(data, default=decimal_default), status=200, mimetype="application/json")
+    return(response)
+#--------
+
 @app.route("/pitchers", methods=['GET', 'POST'])
 def pitchers():
     session['player_type'] = 'Pitch' 
@@ -117,7 +129,7 @@ def choose_pitcher_stats():
     return render_template('data.html', players=session['player_list'], seasons=session['seasons'],
         stats=pitch_stats)
 
-@app.route("/battingdata")
+@app.route("/battingdata")  
 def get_bat_data():
     stat_len = len(session['rank_stats'])
     if session['risk'] == 'M':
@@ -204,7 +216,7 @@ def chart():
     fig = make_chart(int(session['chart_season']), session['player_list'], session['chart_stats'], session['player_type'])
     encoded = fig_to_base64(fig)
     encoded = encoded.decode('utf-8')
-    return render_template('index.html', image=encoded)
+    return render_template('index.html', image=encoded, players = session['player_list'])
 
 def autolabel(rects, player_list, ax):
     """Attach a text label above each bar in *rects*, displaying its height."""
@@ -271,6 +283,9 @@ def make_chart(Year, players, comparison_labels, player_type):
             # one.append(df['AVG'][i])
             # one.append(df['R'][i])
             # print(df['id'][i]) 
+    #--------------------------------------------------------------------------------------------------------------------
+    # set_matplotlib_formats('retina', quality=100)
+    #--------------------------------------------------------------------------------------------------------------------
 
     for i in range(len(df)):
         if (df['Name'][i] == player_second and df['Season'][i] == Year):
@@ -282,20 +297,41 @@ def make_chart(Year, players, comparison_labels, player_type):
     player_one, player_two = recalculation(one, two)
 
 
+    new_player_one = []
+    new_player_two = []
+
+    for i in range(len(player_one)):
+        variable = random.randrange(70, 100) / 100
+        new_player_one.append(player_one[i] * variable)
+        new_player_two.append(player_two[i] * variable)
     x = np.arange(len(comparison_labels))  # the label locations
-    width = 0.2  # the width of the bars
+    width = 0.18  # the width of the bars
 
     fig, ax = plt.subplots()
-    rects1 = ax.bar(x - width/2, player_one, width, label=player_first)
-    rects2 = ax.bar(x + width/2, player_two, width, label=player_second)
+    rects1 = ax.bar(x - width/2, new_player_one, width , label= players[0], color = 'orangered' )
+    rects2 = ax.bar(x + width/2, new_player_two, width , label= players[1], color = 'dodgerblue')
 
     # Add some text for labels, title and custom x-axis tick labels, etc.
 
-    #ax.set_title('Player comparison')
+    ax.set_title(str(players[0]) +' vs ' + str(players[1]) , fontweight='bold', fontsize= 12, fontname = 'Arial')
     ax.set_xticks(x)
-    ax.set_xticklabels(comparison_labels)
+    ax.set_xticklabels(comparison_labels, style = 'italic', fontname = 'Arial', fontsize = 12)
     ax.set_yticks([])
-    ax.legend(bbox_to_anchor=(1, 1))
+    ax.legend(bbox_to_anchor=(1, 1), fontsize = 'large', fancybox = True, shadow = True, facecolor = 'lightyellow')
+    # x = np.arange(len(comparison_labels))  # the label locations
+    # width = 0.2  # the width of the bars
+
+    # fig, ax = plt.subplots()
+    # rects1 = ax.bar(x - width/2, player_one, width, label=player_first)
+    # rects2 = ax.bar(x + width/2, player_two, width, label=player_second)
+
+    # # Add some text for labels, title and custom x-axis tick labels, etc.
+
+    # #ax.set_title('Player comparison')
+    # ax.set_xticks(x)
+    # ax.set_xticklabels(comparison_labels)
+    # ax.set_yticks([])
+    # ax.legend(bbox_to_anchor=(1, 1))
 
     autolabel(rects1, one, ax)
     autolabel(rects2, two, ax)

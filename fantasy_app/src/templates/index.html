@@ -11,11 +11,103 @@
     font: 14px sans-serif;
   }
   </style>
-  </head>
+  </head>         
   <body>
+
+<!--       <div id="players">
+      <h1 class="one">{{players[0]}}</h1>
+      <h1 class="two">{{players[1]}}</h1>
+    </div> -->
     <a href="/"><img src="/static/home.jfif" width="50" height="50"></a>
     <a href="/batters"><img src="/static/bat.jfif" width="50" height="50"></a> 
     <h2 align="center">Player Comparison</h2></br>
+
+         <script type="text/javascript">
+
+            // var player = {{players[0]}}
+
+            var first = document.createElement("div");
+            first.id = "players";
+            first.innerHTML = '<h1 class="one">{{players[0]}}</h1>';
+
+            var second = document.createElement("div");
+            second.id = "players";
+            second.innerHTML = '<h1 class="two">{{players[1]}}</h1>';
+
+            var img_first = first.innerText
+            var img_second = second.innerText
+            console.log(img_first);
+
+
+            var name_one = img_first;
+            var name_two = img_second;
+
+
+            // -------------------------------------------//
+
+            var key_one;
+            var key_two;
+
+
+            d3.json("/batters_image", function(data) {
+                data.map(function(id) {
+                    // console.log(id)
+                    if (id["Name"] == name_one)  {
+                        key_one = id["key_mlbam"];
+                        return;
+                    }
+                    if (id["Name"] == name_two)  {
+                        key_two = id["key_mlbam"];
+                        return;
+                    }
+                    // console.log(id["Name"] );
+                });
+
+                console.log("key_one: ", key_one);
+                console.log("key_two: ", key_two);
+
+                var link_one = "https://securea.mlb.com/mlb/images/players/head_shot/" + key_one + ".jpg"
+                var link_two = "https://securea.mlb.com/mlb/images/players/head_shot/" + key_two + ".jpg"
+
+                console.log("link_one", link_one);
+                console.log("link_two", link_one);
+
+
+
+                var svg = d3.select("body")
+                    .append("svg")
+                    .attr("width", 450)
+                    .attr("height",300)
+                    // .style("border", "1px solid black");
+
+                var imgs = svg.selectAll("image").data([0]);
+                    imgs.enter()
+                    .append("svg:image")
+                    .attr("xlink:href", link_one)
+                    .attr("x", "250")
+                    .attr("y", "30")
+                    .attr("width", "250")
+                    .attr("height", "250");
+
+                var svg2 = d3.select("body")
+                    .append("svg")
+                    .attr("width", 400)
+                    .attr("height", 300)
+                    // .style("border", "1px solid black");
+
+                var imgs2 = svg2.selectAll("image").data([0]);
+                    imgs2.enter()
+                    .append("svg:image")
+                    .attr("xlink:href", link_two)
+                    .attr("x", "150")
+                    .attr("y", "30")
+                    .attr("width", "250")
+                    .attr("height", "250");
+                });
+
+
+
+        </script>
   <div class="container">
     <div class="panel-body"  align="center">
       <img  src="data:image/png;base64, {{image}}">
