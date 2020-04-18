@@ -53,7 +53,8 @@ Season INTEGER
 ,SLGvH DECIMAL(10,4)
 ,SLGrL INTEGER
 ,SLGrM INTEGER
-,SLGrH INTEGER);
+,SLGrH INTEGER
+,G INTEGER);
 
 CREATE TABLE dbo.Pitching(
 Season INTEGER
@@ -109,14 +110,15 @@ Season INTEGER
 ,WHIPrL DECIMAL(10,4)
 ,WHIPrM DECIMAL(10,4)
 ,WHIPrH DECIMAL(10,4)
-,pitcher_type VARCHAR(16));
+,pitcher_type VARCHAR(16)
+,G INTEGER);
 
 LOAD DATA INFILE '/data/batting_1996_2020_risk_calc.csv'
 INTO TABLE dbo.Batting
 FIELDS TERMINATED BY ','
 LINES TERMINATED BY '\n'
 IGNORE 1 LINES
-(@Season,@Name,@HR,@TB,@R,@RBI,@SB,@AVG,@OBP,@SLG,@key_mlbam,@overall_risk,@HRvL,@HRvH,@HRrL,@HRrM,@HRrH,@TBvL,@TBvH,@TBrL,@TBrM,@TBrH,@RvL,@RvH,@RrL,@RrM,@RrH,@RBIvL,@RBIvH,@RBIrL,@RBIrM,@RBIrH,@SBvL,@SBvH,@SBrL,@SBrM,@SBrH,@AVGvL,@AVGvH,@AVGrL,@AVGrM,@AVGrH,@OBPvL,@OBPvH,@OBPrL,@OBPrM,@OBPrH,@SLGvL,@SLGvH,@SLGrL,@SLGrM,@SLGrH)
+(@Season,@Name,@HR,@TB,@R,@RBI,@SB,@AVG,@OBP,@SLG,@key_mlbam,@overall_risk,@HRvL,@HRvH,@HRrL,@HRrM,@HRrH,@TBvL,@TBvH,@TBrL,@TBrM,@TBrH,@RvL,@RvH,@RrL,@RrM,@RrH,@RBIvL,@RBIvH,@RBIrL,@RBIrM,@RBIrH,@SBvL,@SBvH,@SBrL,@SBrM,@SBrH,@AVGvL,@AVGvH,@AVGrL,@AVGrM,@AVGrH,@OBPvL,@OBPvH,@OBPrL,@OBPrM,@OBPrH,@SLGvL,@SLGvH,@SLGrL,@SLGrM,@SLGrH,@G)
 SET Season = CASE WHEN @Season = '' THEN NULL ELSE @Season END,
 Name = CASE WHEN @Name = '' THEN NULL ELSE @Name END,
 HR = CASE WHEN @HR = '' THEN NULL ELSE @HR END,
@@ -168,14 +170,15 @@ SLGvL = CASE WHEN @SLGvL = '' THEN NULL ELSE @SLGvL END,
 SLGvH = CASE WHEN @SLGvH = '' THEN NULL ELSE @SLGvH END,
 SLGrL = CASE WHEN @SLGrL = '' THEN NULL ELSE @SLGrL END,
 SLGrM = CASE WHEN @SLGrM = '' THEN NULL ELSE @SLGrM END,
-SLGrH = CASE WHEN @SLGrH = '' THEN NULL ELSE @SLGrH END;
+SLGrH = CASE WHEN @SLGrH = '' THEN NULL ELSE @SLGrH END,
+G = CASE WHEN @G = '' THEN NULL ELSE @G END;
 
 LOAD DATA INFILE '/data/relievers_1996_2020_risk_calc.csv'
 INTO TABLE dbo.Pitching
 FIELDS TERMINATED BY ','
 LINES TERMINATED BY '\n'
 IGNORE 1 LINES
-(@Season,@Name,@Age,@W,@L,@ERA,@SV,@IP,@HR,@SO,@WHIP,@key_mlbam,@overall_risk,@WvL,@WvH,@WrL,@WrM,@WrH,@LvL,@LvH,@LrL,@LrM,@LrH,@ERAvL,@ERAvH,@ERArL,@ERArM,@ERArH,@SVvL,@SVvH,@SVrL,@SVrM,@SVrH,@IPvL,@IPvH,@IPrL,@IPrM,@IPrH,@HRvL,@HRvH,@HRrL,@HRrM,@HRrH,@SOvL,@SOvH,@SOrL,@SOrM,@SOrH,@WHIPvL,@WHIPvH,@WHIPrL,@WHIPrM,@WHIPrH)
+(@Season,@Name,@Age,@W,@L,@ERA,@SV,@IP,@HR,@SO,@WHIP,@key_mlbam,@overall_risk,@WvL,@WvH,@WrL,@WrM,@WrH,@LvL,@LvH,@LrL,@LrM,@LrH,@ERAvL,@ERAvH,@ERArL,@ERArM,@ERArH,@SVvL,@SVvH,@SVrL,@SVrM,@SVrH,@IPvL,@IPvH,@IPrL,@IPrM,@IPrH,@HRvL,@HRvH,@HRrL,@HRrM,@HRrH,@SOvL,@SOvH,@SOrL,@SOrM,@SOrH,@WHIPvL,@WHIPvH,@WHIPrL,@WHIPrM,@WHIPrH,@G)
 SET Season = CASE WHEN @Season = '' THEN NULL ELSE @Season END,
 Name = CASE WHEN @Name = '' THEN NULL ELSE @Name END,
 Age = CASE WHEN @Age = '' THEN NULL ELSE @Age END,
@@ -229,14 +232,15 @@ WHIPvH = CASE WHEN @WHIPvH = '' THEN NULL ELSE @WHIPvH END,
 WHIPrL = CASE WHEN @WHIPrL = '' THEN NULL ELSE @WHIPrL END,
 WHIPrM = CASE WHEN @WHIPrM = '' THEN NULL ELSE @WHIPrM END,
 WHIPrH = CASE WHEN @WHIPrH = '' THEN NULL ELSE @WHIPrH END,
-pitcher_type = 'Reliever';
+pitcher_type = 'Reliever',
+G = CASE WHEN @G = '' THEN NULL ELSE @G END;
 
 LOAD DATA INFILE '/data/starters_1996_2020_risk_calc.csv'
 INTO TABLE dbo.Pitching
 FIELDS TERMINATED BY ','
 LINES TERMINATED BY '\n'
 IGNORE 1 LINES
-(@Season,@Name,@Age,@W,@L,@ERA,@SV,@IP,@HR,@SO,@WHIP,@key_mlbam,@overall_risk,@WvL,@WvH,@WrL,@WrM,@WrH,@LvL,@LvH,@LrL,@LrM,@LrH,@ERAvL,@ERAvH,@ERArL,@ERArM,@ERArH,@SVvL,@SVvH,@SVrL,@SVrM,@SVrH,@IPvL,@IPvH,@IPrL,@IPrM,@IPrH,@HRvL,@HRvH,@HRrL,@HRrM,@HRrH,@SOvL,@SOvH,@SOrL,@SOrM,@SOrH,@WHIPvL,@WHIPvH,@WHIPrL,@WHIPrM,@WHIPrH)
+(@Season,@Name,@Age,@W,@L,@ERA,@SV,@IP,@HR,@SO,@WHIP,@key_mlbam,@overall_risk,@WvL,@WvH,@WrL,@WrM,@WrH,@LvL,@LvH,@LrL,@LrM,@LrH,@ERAvL,@ERAvH,@ERArL,@ERArM,@ERArH,@SVvL,@SVvH,@SVrL,@SVrM,@SVrH,@IPvL,@IPvH,@IPrL,@IPrM,@IPrH,@HRvL,@HRvH,@HRrL,@HRrM,@HRrH,@SOvL,@SOvH,@SOrL,@SOrM,@SOrH,@WHIPvL,@WHIPvH,@WHIPrL,@WHIPrM,@WHIPrH,@G)
 SET Season = CASE WHEN @Season = '' THEN NULL ELSE @Season END,
 Name = CASE WHEN @Name = '' THEN NULL ELSE @Name END,
 Age = CASE WHEN @Age = '' THEN NULL ELSE @Age END,
@@ -290,4 +294,5 @@ WHIPvH = CASE WHEN @WHIPvH = '' THEN NULL ELSE @WHIPvH END,
 WHIPrL = CASE WHEN @WHIPrL = '' THEN NULL ELSE @WHIPrL END,
 WHIPrM = CASE WHEN @WHIPrM = '' THEN NULL ELSE @WHIPrM END,
 WHIPrH = CASE WHEN @WHIPrH = '' THEN NULL ELSE @WHIPrH END,
-pitcher_type = 'Starter';
+pitcher_type = 'Starter',
+G = CASE WHEN @G = '' THEN NULL ELSE @G END;

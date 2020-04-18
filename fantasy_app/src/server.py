@@ -9,6 +9,8 @@ import io
 import base64
 from IPython.display import set_matplotlib_formats
 import random
+#import mplcursors
+
 
 app = Flask(__name__)
 app.secret_key = "abc" 
@@ -106,7 +108,7 @@ def pitchers():
 
 @app.route("/pitchers-data")
 def show_pitcher_data():    
-    return render_template('sorting_pitch_modify.html', stats=session['rank_stats'], risk=session['risk'])
+    return render_template('sorting_pitch_modify.html', stats=session['rank_stats'], risk=session['risk'], position=session['pitch_position'])
 
 @app.route("/choose-pitchers", methods=['GET', 'POST'])
 def choose_pitchers():
@@ -195,6 +197,7 @@ def render_individual_pitch_stats(player_name):
 @app.route("/stat/<player_name>")
 def get_individual_stats(player_name):
     cur = mysql.connection.cursor()
+    session['player'] = player_name
     if session['player_type'] == 'Bat':
         cur.execute("SELECT Season, Name, HR, TB, R, RBI, SB, AVG, OBP, SLG, ROW_NUMBER() OVER (ORDER BY Season DESC) num FROM dbo.Batting WHERE Name = %s ORDER BY Season DESC", (player_name,))
     else:
@@ -211,6 +214,104 @@ def compare_stats():
         return redirect(url_for('chart'))
     else:
         return ('', 204)
+
+##################################
+@app.route("/careerstats", methods=['GET','POST'])
+def chart2():
+    if request.method == "POST":
+        session['stat'] = request.form.get("mode")
+        fig2 = make_chart2(session['player'], session['stat'], session['player_type'])
+        encoded2 = fig_to_base64_2(fig2)
+        encoded2 = encoded2.decode('utf-8')
+        return render_template('index.html', image = encoded2)
+    else:
+        return ('', 204)
+
+# #autolabel chart (same as other chart)
+def autolabel(rects, player_list, ax):
+    """Attach a text label above each bar in *rects*, displaying its height."""
+    i = 0
+    for rect in rects:
+        height = rect.get_height() + .5
+        ax.annotate('{}'.format(player_list[i]),
+                   xy=(rect.get_x() + rect.get_width() / 2, height - 1),
+                   xytext=(0, 3),  # 3 points vertical offset
+                   textcoords="offset points",
+                   ha='center', va='bottom')
+        i+= 1
+
+# # #make historical progression chart
+def make_chart2(player, stat, player_type):
+    matplotlib.pyplot.switch_backend('Agg')
+
+    # #stat is an input from the radio button
+    comparison_labels = ['G']
+    comparison_labels.append(stat)
+
+    col = ["Name", "Season"]
+    for item in comparison_labels:
+	    col.append(item)
+    
+    x = []
+    y1 = []
+    y2 = []
+
+    cur = mysql.connection.cursor()
+
+    if player_type == 'Bat':
+        cur.execute("SELECT Season, Name, HR, TB, R, RBI, SB, AVG, OBP, SLG, G FROM dbo.Batting WHERE Name = %s AND Season < 2020", (player,))
+    else:
+        cur.execute("SELECT Season, Name, W, L, ERA, SV, IP, HR, SO, WHIP, G FROM dbo.Pitching WHERE Name = %s AND Season < 2020", (player,))
+    data = cur.fetchall()
+    df = pd.DataFrame(data)
+
+    for i in range(len(df)):
+	    if (df['Name'][i] == player):
+		    x.append(df['Season'][i])
+		    y1.append(df[comparison_labels[0]][i])
+		    y2.append(df[comparison_labels[1]][i])
+
+    fig, ax1 = plt.subplots()
+    if len(y1) == 0:
+        return 'This is an empty list'
+    else:
+        y1max = max(y1)
+
+    ax1.set_title(player + "'s " + comparison_labels[1] + " statistics")
+    ax2 = ax1.twinx()
+    ax1.plot(x, y1, 'o', color = 'royalblue', pickradius = 5 )
+    #ax2.plot(x, y2, 'o', color = 'r')
+
+    ax1.set_ylim(0, y1max * 1.2)
+    ax1.set_xlabel('Year')
+    ax1.set_ylabel(comparison_labels[0], color='b')
+    ax1.tick_params(axis='y', colors='b')
+    ax2.set_ylabel(comparison_labels[1], color='r')
+    ax2.tick_params(axis='y', colors='r')
+    width = 0.5  # the width of the bars
+    rects2 = ax2.bar(x, y2, width = width, color = 'tomato')
+
+    scale_factor = decimal.Decimal(0.4)
+    ymin = min(y2)
+    ymax = max(y2)
+
+    ax2.set_ylim(ymin * scale_factor, ymax * (1 + scale_factor))
+    #mplcursors.cursor(hover=True)
+
+    autolabel(rects2, y2, ax2)
+
+    return fig
+
+#what does this part do?
+def fig_to_base64_2(fig):
+    img = io.BytesIO()
+    fig.savefig(img, format='png',
+                bbox_inches='tight')
+    img.seek(0)
+
+    return base64.b64encode(img.getvalue())
+
+##################################
 
 @app.route("/chart")
 def chart():
@@ -245,7 +346,10 @@ def recalculation(one, two):
         else:
             maxval = two[i]
 
-        const = 100 / maxval
+        if maxval == 0:
+            const = 1
+        else:
+            const = 100 / maxval
         new_one = int(one[i] * const)
         new_two = two[i] * const
 
