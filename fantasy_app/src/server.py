@@ -93,7 +93,7 @@ def pitchers():
 
 @app.route("/pitchers-data")
 def show_pitcher_data():    
-    return render_template('sorting_pitch_modify.html', stats=session['rank_stats'], risk=session['risk'])
+    return render_template('sorting_pitch_modify.html', stats=session['rank_stats'], risk=session['risk'], position=session['pitch_position'])
 
 @app.route("/choose-pitchers", methods=['GET', 'POST'])
 def choose_pitchers():
