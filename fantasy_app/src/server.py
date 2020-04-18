@@ -220,12 +220,13 @@ def compare_stats():
 def chart2():
     if request.method == "POST":
         session['stat'] = request.form.get("mode")
-        fig2 = make_chart2(session['player'], session['stat'], session['player_type'])
-        encoded2 = fig_to_base64_2(fig2)
-        encoded2 = encoded2.decode('utf-8')
-        return render_template('index.html', image = encoded2)
-    else:
-        return ('', 204)
+        if session['stat']:
+            fig2 = make_chart2(session['player'], session['stat'], session['player_type'])
+            encoded2 = fig_to_base64_2(fig2)
+            encoded2 = encoded2.decode('utf-8')
+            return render_template('career_stats.html', image = encoded2)
+        else:
+            return ('', 204)
 
 # #autolabel chart (same as other chart)
 def autolabel(rects, player_list, ax):

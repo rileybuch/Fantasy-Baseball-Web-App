@@ -29,8 +29,8 @@ body {
   width: 100%;
   height: 100%;
   position: absolute;
-  top: 40px;
-  left: 20px;
+  top: 150px;
+  left: 150px;
 }
 
 .SearchBar { 
@@ -67,8 +67,8 @@ body {
 }
 
 table { 
-  position: absolute;
-  top: 80px;
+  position: relative;
+  top: 15px;
   left: 150px;
   border-collapse: collapse;
   margin-bottom: 20px;
@@ -96,6 +96,11 @@ td { background-color: #92c5de; }
 
 tr:hover td { background-color: #edf8b1; }
 
+.fluid{
+  position: absolute;
+  left: 300px;
+}
+
 </style>
 <body>
   <a href="/"><img src="/static/home.jfif" width="50" height="50"></a>
@@ -104,21 +109,28 @@ tr:hover td { background-color: #edf8b1; }
   <h2 align="center">MLB player stats</h2>
   <br/>
   <br/>
- 
-  <div id="FilterableTable" class="container-fluid">
+  <div class="container">
+    <div class="fluid">
+    <form id="StatButton", method="POST", action="/careerstats">
+      <input type='radio' id="W" name="mode" value='W'> W</input>
+      &nbsp;&nbsp;&nbsp;<input type='radio' id="L" name="mode" value='L'> L</input>
+      &nbsp;&nbsp;&nbsp;<input type='radio' id="ERA" name="mode" value='ERA'> ERA</input>
+      &nbsp;&nbsp;&nbsp;<input type='radio' id="SV" name="mode" value='SV'> SV</input>
+      &nbsp;&nbsp;&nbsp;<input type='radio' id="IP" name="mode" value='IP'> IP</input>
+      &nbsp;&nbsp;&nbsp;<input type='radio' id="HR" name="mode" value='HR'> HR</input>
+      &nbsp;&nbsp;&nbsp;<input type='radio' id="SO" name="mode" value='SO'> SO</input>
+      &nbsp;&nbsp;&nbsp;<input type='radio' id="WHIP" name="mode" value='WHIP'> WHIP</input>
+      &nbsp;&nbsp;&nbsp;<input type='submit', value = "Graph"></input>
+    </form>
+  </div>
+  </div>
+  <div class="container">
+  <div id="FilterableTable" class="panel-body">
    </div>
+   </div>
+  </body>
 <script src="https://d3js.org/d3.v3.js"></script>
-<form id="StatButton", method="POST", action="/careerstats">
-  <input type='radio' id="W" name="mode" value='W'>W</input>
-  <input type='radio' id="L" name="mode" value='L'>L</input>
-  <input type='radio' id="ERA" name="mode"v alue='ERA'>ERA</input>
-  <input type='radio' id="SV" name="mode" value='SV'>SV</input>
-  <input type='radio' id="IP" name="mode" value='IP'>IP</input>
-  <input type='radio' id="HR" name="mode" value='HR'>HR</input>
-  <input type='radio' id="SO" name="mode" value='SO'>SO</input>
-  <input type='radio' id="WHIP" name="mode" value='WHIP'>WHIP</input>
-  <input type='submit', value = "Graph"></input>
-</form>
+
 <script>
 
 var column_names = ["Season","Name","Position","W", "L", "ERA", "SV", "IP", "HR", "SO", "WHIP"];
