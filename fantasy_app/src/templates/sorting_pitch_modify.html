@@ -1,5 +1,9 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
+<head>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+</head>
 <style>
 body {
   background-color: #d1e5f0;
@@ -91,38 +95,48 @@ tr:hover td { background-color: #edf8b1; }
 
 </style>
 <body>
-  <h1>MLB Pitching Data 2020 Projections</h1>
-  <form method="POST" action="/pitchers">
-    <label for="risk">Choose your risk tolerance:</label>
-    <select name="risk">
-      <option value='M' {{'selected' if 'M' == risk}}>Medium</option>
-      <option value='L' {{'selected' if 'L' == risk}}>Low</option>
-      <option value='H' {{'selected' if 'H' == risk}}>High</option>
-    </select>
-    <label for="position">Position:</label>
-    <select name="position">
-      <option value='Starter' {{'selected' if 'Starter' == position}}>Starter</option>
-      <option value='Reliever' {{'selected' if 'Reliever' == position}}>Reliever</option>
-    </select>
-    <br><br>
-    <label for="rank_stats">Choose stats to rank players by (Choose at least 4):</label><br>
-    W<input type="checkbox" name="rank_stats" value="W" {{'checked' if 'W' in stats}}>
-    L<input type="checkbox" name="rank_stats" value="L" {{'checked' if 'L' in stats}}>
-    ERA<input type="checkbox" name="rank_stats" value="ERA" {{'checked' if 'ERA' in stats}}>
-    SV<input type="checkbox" name="rank_stats" value="SV" {{'checked' if 'SV' in stats}}>
-    IP<input type="checkbox" name="rank_stats" value="IP" {{'checked' if 'IP' in stats}}>
-    HR<input type="checkbox" name="rank_stats" value="HR" {{'checked' if 'HR' in stats}}>
-    SO<input type="checkbox" name="rank_stats" value="SO" {{'checked' if 'SO' in stats}}>
-    WHIP<input type="checkbox" name="rank_stats" value="WHIP" {{'checked' if 'WHIP' in stats}}>
-    <br>
-    <input type="submit" value="Rank Players">
-  </form>
-  <form method="POST" action="/choose-pitchers" id="pitchers"></form>
+  <a href="/"><img src="/static/home.jfif" width="50" height="50"></a>
+  <a href="/batters"><img src="/static/bat.jfif" width="50" height="50"></a> 
+  <a href="/pitchers"><img src="/static/pitch.jfif" width="50" height="50"></a>
+  <h2 align="center">MLB Pitching Data 2020 Projections</h2>
+  <div class="container">
+    <div class="panel-body">
+      <form method="POST" action="/pitchers">
+        <label for="risk">Choose your risk tolerance:</label>
+        <select name="risk">
+          <option value='M' {{'selected' if 'M' == risk}}>Medium</option>
+          <option value='L' {{'selected' if 'L' == risk}}>Low</option>
+          <option value='H' {{'selected' if 'H' == risk}}>High</option>
+        </select>
+        <label for="position">Position:</label>
+        <select name="position">
+          <option value='Starter' {{'selected' if 'Starter' == position}}>Starter</option>
+          <option value='Reliever' {{'selected' if 'Reliever' == position}}>Reliever</option>
+        </select>
+        <br><br>
+        <label for="rank_stats">Choose stats to rank players by (Choose at least 4):</label><br>
+        W <input type="checkbox" name="rank_stats" value="W" {{'checked' if 'W' in stats}}>
+        &nbsp;&nbsp;&nbsp;L <input type="checkbox" name="rank_stats" value="L" {{'checked' if 'L' in stats}}>
+        &nbsp;&nbsp;&nbsp;ERA <input type="checkbox" name="rank_stats" value="ERA" {{'checked' if 'ERA' in stats}}>
+        &nbsp;&nbsp;&nbsp;SV <input type="checkbox" name="rank_stats" value="SV" {{'checked' if 'SV' in stats}}>
+        &nbsp;&nbsp;&nbsp;IP <input type="checkbox" name="rank_stats" value="IP" {{'checked' if 'IP' in stats}}>
+        &nbsp;&nbsp;&nbsp;HR <input type="checkbox" name="rank_stats" value="HR" {{'checked' if 'HR' in stats}}>
+        &nbsp;&nbsp;&nbsp;SO <input type="checkbox" name="rank_stats" value="SO" {{'checked' if 'SO' in stats}}>
+        &nbsp;&nbsp;&nbsp;WHIP <input type="checkbox" name="rank_stats" value="WHIP" {{'checked' if 'WHIP' in stats}}>
+        &nbsp;&nbsp;&nbsp;&nbsp;<input type="submit" value="Rank Players">
+      </form>
+    </div>
+   </div> 
+   <div class="container">
+    <div class="panel-body">
+     <form method="POST" action="/choose-pitchers" id="pitchers"></form>
+    </div>
+   </div> 
 </body>
 <script src="https://d3js.org/d3.v3.js"></script>
 <script>
 
-var column_names = ["Season","Name","Position","W", "L", "ERA", "SV", "IP", "HR", "SO", "WHIP", "Rank","Compare"];
+var column_names = ["Season","Name","Position","W", "L", "ERA", "SV", "IP", "HR", "SO", "WHIP", "Rank","Compare", ""];
 var clicks = {Season: 0,Name: 0,Position: 0,W: 0, L: 0, ERA: 0, SV: 0, IP: 0, HR: 0, SO: 0, WHIP: 0, Rank:0};
 
 // draw the table
@@ -164,12 +178,12 @@ d3.select("#pitchers").append("div")
 //     .attr("placeholder", "Search...");
 
 // third search bar
-d3.select("#FilterableTable").append("div")
-  .attr("class", "SearchBar3")
-  .append("input")
-    // .attr("class", "SearchBar")
-    .attr("type", "submit")
-    .attr("value", "Compare Players")
+// d3.select("#FilterableTable").append("div")
+//   .attr("class", "SearchBar3")
+//   .append("input")
+//     // .attr("class", "SearchBar")
+//     .attr("type", "submit")
+//     .attr("value", "Compare Players")
 
 
 // d3.select(".SearchBar3")
@@ -217,7 +231,7 @@ d3.json("/pitchingdata", function(data) { // loading data from server
 		    arr.push(d[k]);
           }
         }
-        return [arr[0],arr[1],arr[2],arr[3],arr[4],arr[5],arr[6],arr[7],arr[8],arr[9], arr[10], arr[11], ""];
+        return [arr[0],arr[1],arr[2],arr[3],arr[4],arr[5],arr[6],arr[7],arr[8],arr[9], arr[10], arr[11], "", ""];
       })
     .enter()
       .append("td")
@@ -265,6 +279,15 @@ d3.json("/pitchingdata", function(data) { // loading data from server
       }
     }  
   })
+
+  button_column = row_entries.filter(function(d, i) {
+    return i == 13
+  })
+
+  button_column.append("input")
+    // .attr("class", "SearchBar")
+    .attr("type", "submit")
+    .attr("value", "Compare Players")
 
     
   // /**  search functionality **/
