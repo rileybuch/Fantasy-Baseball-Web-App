@@ -202,24 +202,14 @@ def compare_stats():
         return ('', 204)
 
 ##################################
-
 @app.route("/careerstats", methods=['GET','POST'])
 def chart2():
     if request.method == "POST":
         session['stat'] = request.form.get("mode")
         fig2 = make_chart2(session['player'], session['stat'], session['player_type'])
-        if isinstance(fig2, str):
-            return fig2
-        elif isinstance(fig2, int):
-            return fig2
-        elif isinstance(fig2, pd.DataFrame):
-            return str(fig2)
-        else:
-            return str(fig2)
-            # encoded2 = fig_to_base64_2(fig2)
-            # encoded2 = encoded2.decode('utf-8')
-            #return session['player_type']
-            #return render_template('index.html', image = encoded2)
+        encoded2 = fig_to_base64_2(fig2)
+        encoded2 = encoded2.decode('utf-8')
+        return render_template('index.html', image = encoded2)
     else:
         return ('', 204)
 
@@ -260,13 +250,6 @@ def make_chart2(player, stat, player_type):
         cur.execute("SELECT Season, Name, W, L, ERA, SV, IP, HR, SO, WHIP, G FROM dbo.Pitching WHERE Name = %s AND Season < 2020", (player,))
     data = cur.fetchall()
     df = pd.DataFrame(data)
-    if len(df) > 0:
-        return df.columns
-
-    # if player_type == 'Bat':
-    #     df = pd.read_sql("SELECT Season, Name, HR, TB, R, RBI, SB, AVG, OBP, SLG FROM dbo.Batting WHERE Name = %s", mysql.connection, params=[tuple(player)])
-    # else:
-    #     df = pd.read_sql("SELECT Season, Name, W, L, ERA, SV, IP, HR, SO, WHIP FROM dbo.Pitching WHERE Name = %s", mysql.connection, params=[tuple(player)])
 
     for i in range(len(df)):
 	    if (df['Name'][i] == player):
@@ -294,7 +277,7 @@ def make_chart2(player, stat, player_type):
     width = 0.5  # the width of the bars
     rects2 = ax2.bar(x, y2, width = width, color = 'tomato')
 
-    scale_factor = 0.4
+    scale_factor = decimal.Decimal(0.4)
     ymin = min(y2)
     ymax = max(y2)
 
