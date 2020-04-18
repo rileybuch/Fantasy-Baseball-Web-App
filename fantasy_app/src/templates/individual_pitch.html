@@ -1,5 +1,11 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
+<head>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+  <script src="https://d3js.org/d3.v3.js"></script>
+  </head>
 <style>
 body {
   background-color: #d1e5f0;
@@ -62,10 +68,11 @@ body {
 
 table { 
   position: absolute;
-  top: 40px;
-  left: 20px;
+  top: 80px;
+  left: 150px;
   border-collapse: collapse;
   margin-bottom: 20px;
+  width: 70%;
 }
 
 table a:link, a:visited { text-decoration: none; }
@@ -91,6 +98,15 @@ tr:hover td { background-color: #edf8b1; }
 
 </style>
 <body>
+  <a href="/"><img src="/static/home.jfif" width="50" height="50"></a>
+  <a href="/batters"><img src="/static/bat.jfif" width="50" height="50"></a>
+  <a href="/pitchers"><img src="/static/pitch.jfif" width="50" height="50"></a>
+  <h2 align="center">MLB player stats</h2>
+  <br/>
+  <br/>
+ 
+  <div id="FilterableTable" class="container-fluid">
+   </div>
 <script src="https://d3js.org/d3.v3.js"></script>
 <script>
 
@@ -98,15 +114,15 @@ var column_names = ["Season","Name","Position","W", "L", "ERA", "SV", "IP", "HR"
 var clicks = {Season: 0,Name: 0,Position: 0,W: 0, L: 0, ERA: 0, SV: 0, IP: 0, HR: 0, SO: 0, WHIP: 0};
 
 // draw the table
-d3.select("body").append("div")
-  .attr("id", "container")
+// d3.select("body").append("div")
+//   .attr("id", "container")
 
-d3.select("#container").append("div")
-  .attr("id", "FilterableTable");
+// d3.select("#container").append("div")
+//   .attr("id", "FilterableTable");
 
-d3.select("#FilterableTable").append("h1")
-  .attr("id", "title")
-  .text("MLB player stats")
+// d3.select("#FilterableTable").append("h1")
+//   .attr("id", "title")
+//   .text("MLB player stats")
 
 // d3.select("#FilterableTable").append("div")
 //   .attr("class", "SearchBar")

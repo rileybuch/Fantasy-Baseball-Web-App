@@ -5,6 +5,7 @@
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
   <script src="https://d3js.org/d3.v3.js"></script>
+</head>
 <style>
 body {
   background-color: #d1e5f0;
@@ -67,10 +68,11 @@ body {
 
 table { 
   position: absolute;
-  top: 40px;
-  left: 20px;
+  top: 80px;
+  left: 150px;
   border-collapse: collapse;
   margin-bottom: 20px;
+  width: 70%;
 }
 
 table a:link, a:visited { text-decoration: none; }
@@ -99,14 +101,15 @@ tr:hover td { background-color: #edf8b1; }
 <body>
   <a href="/"><img src="/static/home.jfif" width="50" height="50"></a>
   <a href="/batters"><img src="/static/bat.jfif" width="50" height="50"></a>
+  <a href="/pitchers"><img src="/static/pitch.jfif" width="50" height="50"></a>
   <h2 align="center">MLB player stats</h2>
+
   <br/>
   <br/>
-  <div class="container">
-    <div id="FilterableTable" class="row align-items-center">
-      
+ 
+  <div id="FilterableTable" class="container-fluid">
    </div>
-  </div>
+
 </body>
 <script>
 
