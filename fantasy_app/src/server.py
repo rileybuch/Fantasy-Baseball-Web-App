@@ -257,9 +257,7 @@ def make_chart2(player, stat, player_type):
     if player_type == 'Bat':
         cur.execute("SELECT Season, Name, HR, TB, R, RBI, SB, AVG, OBP, SLG, G FROM dbo.Batting WHERE Name = %s AND Season < 2020", (player,))
     else:
-        cur.execute("SELECT * FROM dbo.Pitching WHERE Name = %s AND Season < 2020", (player,))
-    # else:
-    #     cur.execute("SELECT Season, Name, W, L, ERA, SV, IP, HR, SO, WHIP, G FROM dbo.Pitching WHERE Name = %s AND Season < 2020", (player,))
+        cur.execute("SELECT Season, Name, W, L, ERA, SV, IP, HR, SO, WHIP, G FROM dbo.Pitching WHERE Name = %s AND Season < 2020", (player,))
     data = cur.fetchall()
     df = pd.DataFrame(data)
     if len(df) > 0:
