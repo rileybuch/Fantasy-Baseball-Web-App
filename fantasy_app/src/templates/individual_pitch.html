@@ -108,6 +108,17 @@ tr:hover td { background-color: #edf8b1; }
   <div id="FilterableTable" class="container-fluid">
    </div>
 <script src="https://d3js.org/d3.v3.js"></script>
+<form id="StatButton", method="POST", action="/careerstats">
+  <input type='radio' id="W" name="mode" value='W'>W</input>
+  <input type='radio' id="L" name="mode" value='L'>L</input>
+  <input type='radio' id="ERA" name="mode"v alue='ERA'>ERA</input>
+  <input type='radio' id="SV" name="mode" value='SV'>SV</input>
+  <input type='radio' id="IP" name="mode" value='IP'>IP</input>
+  <input type='radio' id="HR" name="mode" value='HR'>HR</input>
+  <input type='radio' id="SO" name="mode" value='SO'>SO</input>
+  <input type='radio' id="WHIP" name="mode" value='WHIP'>WHIP</input>
+  <input type='submit', value = "Graph"></input>
+</form>
 <script>
 
 var column_names = ["Season","Name","Position","W", "L", "ERA", "SV", "IP", "HR", "SO", "WHIP"];
@@ -782,11 +793,29 @@ d3.json("/stat/{{player_name}}", function(data) { // loading data from server
             } else {
               return 0;
             }
-          });
-        }
+              });
+            }
+          }
+          //  
+        }) // end of click listeners
+
+      // draw graph based on which radio button is selected 
+      function changeStat() {
+        //console.log("data:", data)
+
+        var stat_to_graph = d3.select('input[name="mode"]:checked').node().id
+        //console.log(stat_to_graph)
+        var player_type = 'Pitch'
+        var player = data[0].Name
+        //console.log("stat to graph", stat_to_graph)
+
+        // need to go to server.py app.route "/careerstats"
       }
-      //  
-    }) // end of click listeners
-});
-d3.select(self.frameElement).style("height", "780px").style("width", "1150px");	
-</script>
+
+      // Event listener to the radio button
+      d3.select("#StatButton").on("change", changeStat)
+
+
+    });
+    d3.select(self.frameElement).style("height", "780px").style("width", "1150px");	
+  </script>
