@@ -232,7 +232,10 @@ def recalculation(one, two):
         else:
             maxval = two[i]
 
-        const = 100 / maxval
+        if maxval == 0:
+            const = 1
+        else:
+            const = 100 / maxval
         new_one = int(one[i] * const)
         new_two = two[i] * const
 
