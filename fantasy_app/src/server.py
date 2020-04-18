@@ -208,10 +208,18 @@ def chart2():
     if request.method == "POST":
         session['stat'] = request.form.get("mode")
         fig2 = make_chart2(session['player'], session['stat'], session['player_type'])
-        encoded2 = fig_to_base64_2(fig2)
-        encoded2 = encoded2.decode('utf-8')
-        return session['player_type']
-#         return render_template('index.html', image = encoded2)
+        if isinstance(fig2, str):
+            return fig2
+        elif isinstance(fig2, int):
+            return fig2
+        elif isinstance(fig2, pd.DataFrame):
+            return str(fig2)
+        else:
+            return str(fig2)
+            # encoded2 = fig_to_base64_2(fig2)
+            # encoded2 = encoded2.decode('utf-8')
+            #return session['player_type']
+            #return render_template('index.html', image = encoded2)
     else:
         return ('', 204)
 
@@ -244,24 +252,40 @@ def make_chart2(player, stat, player_type):
     y1 = []
     y2 = []
 
+    cur = mysql.connection.cursor()
+
     if player_type == 'Bat':
-        df = pd.read_sql("SELECT Season, Name, G, HR, TB, R, RBI, SB, AVG, OBP, SLG FROM dbo.Batting WHERE Name IN %s", mysql.connection, params=[tuple(player)])
+        cur.execute("SELECT Season, Name, HR, TB, R, RBI, SB, AVG, OBP, SLG, G FROM dbo.Batting WHERE Name = %s AND Season < 2020", (player,))
     else:
-        df = pd.read_sql("SELECT Season, Name, G, W, L, ERA, SV, IP, HR, SO, WHIP FROM dbo.Pitching WHERE Name IN %s", mysql.connection, params=[tuple(player)])
+        cur.execute("SELECT * FROM dbo.Pitching WHERE Name = %s AND Season < 2020", (player,))
+    # else:
+    #     cur.execute("SELECT Season, Name, W, L, ERA, SV, IP, HR, SO, WHIP, G FROM dbo.Pitching WHERE Name = %s AND Season < 2020", (player,))
+    data = cur.fetchall()
+    df = pd.DataFrame(data)
+    if len(df) > 0:
+        return df.columns
+
+    # if player_type == 'Bat':
+    #     df = pd.read_sql("SELECT Season, Name, HR, TB, R, RBI, SB, AVG, OBP, SLG FROM dbo.Batting WHERE Name = %s", mysql.connection, params=[tuple(player)])
+    # else:
+    #     df = pd.read_sql("SELECT Season, Name, W, L, ERA, SV, IP, HR, SO, WHIP FROM dbo.Pitching WHERE Name = %s", mysql.connection, params=[tuple(player)])
 
     for i in range(len(df)):
 	    if (df['Name'][i] == player):
 		    x.append(df['Season'][i])
-		    y1.append(df[comparison_labels[0]][i])	
+		    y1.append(df[comparison_labels[0]][i])
 		    y2.append(df[comparison_labels[1]][i])
 
     fig, ax1 = plt.subplots()
-
-    y1max = max(y1)
+    if len(y1) == 0:
+        return 'This is an empty list'
+    else:
+        y1max = max(y1)
 
     ax1.set_title(player + "'s " + comparison_labels[1] + " statistics")
     ax2 = ax1.twinx()
     ax1.plot(x, y1, 'o', color = 'royalblue', pickradius = 5 )
+    #ax2.plot(x, y2, 'o', color = 'r')
 
     ax1.set_ylim(0, y1max * 1.2)
     ax1.set_xlabel('Year')
@@ -277,7 +301,7 @@ def make_chart2(player, stat, player_type):
     ymax = max(y2)
 
     ax2.set_ylim(ymin * scale_factor, ymax * (1 + scale_factor))
-    ##mplcursors.cursor(hover=True)
+    #mplcursors.cursor(hover=True)
 
     autolabel(rects2, y2, ax2)
 
