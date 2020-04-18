@@ -378,16 +378,14 @@ def make_chart(Year, players, comparison_labels, player_type):
     for i in range(len(df)):
         if (df['Name'][i] == player_first and df['Season'][i] == Year):
             for label in comparison_labels:
-                if (label == 'AVG'):
+                if (label == 'AVG' or label == 'OBP' or label == 'SLG'):
                     one.append(round(df[label][i], 3))
+                elif (label == 'ERA' or label == 'WHIP' ):
+                    one.append(round(df[label][i], 2))
+                elif (label == 'IP'):
+                    one.append(round(df[label][i], 1))
                 else: one.append(df[label][i])
-            # one.append(df['G'][i])
-            # one.append(df['HR'][i])
-            # one.append(df['SB'][i])
-            # one.append(df['H'][i])
-            # one.append(df['AVG'][i])
-            # one.append(df['R'][i])
-            # print(df['id'][i]) 
+
     #--------------------------------------------------------------------------------------------------------------------
     # set_matplotlib_formats('retina', quality=100)
     #--------------------------------------------------------------------------------------------------------------------
@@ -395,8 +393,12 @@ def make_chart(Year, players, comparison_labels, player_type):
     for i in range(len(df)):
         if (df['Name'][i] == player_second and df['Season'][i] == Year):
             for label in comparison_labels:
-                if (label == 'AVG'):
+                if (label == 'AVG' or label == 'OBP' or label == 'SLG'):
                     two.append(round(df[label][i], 3))
+                elif (label == 'ERA' or label == 'WHIP' ):
+                    two.append(round(df[label][i], 2))
+                elif (label == 'IP' ):
+                    two.append(round(df[label][i], 1))
                 else: two.append(df[label][i])
 
     player_one, player_two = recalculation(one, two)
