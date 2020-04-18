@@ -43,20 +43,21 @@
             var name_two = img_second;
 
 
+
             // -------------------------------------------//
 
             var key_one;
             var key_two;
+            // 559206
 
-
-            d3.json("/batters_image", function(data) {
+            d3.json("/image", function(data) {
                 data.map(function(id) {
                     // console.log(id)
-                    if (id["Name"] == name_one)  {
+                    if (id["Name"] == name_one && id["key_mlbam"] != 595375 && id["key_mlbam"] != 559206 && id["key_mlbam"] != 283166 && id["key_mlbam"] != 502264)  {
                         key_one = id["key_mlbam"];
                         return;
                     }
-                    if (id["Name"] == name_two)  {
+                    if (id["Name"] == name_two && id["key_mlbam"] != 595375 && id["key_mlbam"] != 559206 && id["key_mlbam"] != 283166 && id["key_mlbam"] != 502264)  {
                         key_two = id["key_mlbam"];
                         return;
                     }

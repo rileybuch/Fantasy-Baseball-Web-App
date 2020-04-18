@@ -77,10 +77,11 @@ def choose_batter_stats():
         stats=bat_stats)
 
 #----------
-@app.route("/batters_image")
-def image_batters():
+@app.route("/image")
+def image():
     cur = mysql.connection.cursor()
-    cur.execute("SELECT Name, key_mlbam FROM dbo.Batting")
+    # cur.execute("SELECT Name, key_mlbam FROM dbo.Batting")
+    cur.execute("SELECT Name, key_mlbam FROM dbo.Batting UNION ALL SELECT Name, key_mlbam FROM dbo.Pitching")
     data = cur.fetchall()
     response = Response(response=json.dumps(data, default=decimal_default), status=200, mimetype="application/json")
     return(response)
