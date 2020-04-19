@@ -229,13 +229,13 @@ def chart2():
             return ('', 204)
 
 # #autolabel chart (same as other chart)
-def autolabel(rects, player_list, ax):
+def autolabel2(rects, player_list, ax):
     """Attach a text label above each bar in *rects*, displaying its height."""
     i = 0
     for rect in rects:
-        height = rect.get_height() + .5
+        height = rect.get_height()
         ax.annotate('{}'.format(player_list[i]),
-                   xy=(rect.get_x() + rect.get_width() / 2, height - 1),
+                   xy=(rect.get_x() + rect.get_width() / 2, height + (.01*height)),
                    xytext=(0, 3),  # 3 points vertical offset
                    textcoords="offset points",
                    ha='center', va='bottom')
@@ -267,16 +267,21 @@ def make_chart2(player, stat, player_type):
     df = pd.DataFrame(data)
 
     for i in range(len(df)):
-	    if (df['Name'][i] == player):
-		    x.append(df['Season'][i])
-		    y1.append(df[comparison_labels[0]][i])
-		    y2.append(df[comparison_labels[1]][i])
+        if (df['Name'][i] == player):
+            x.append(df['Season'][i])
+            y1.append(df[comparison_labels[0]][i])
+            if (comparison_labels[1] == 'AVG' or comparison_labels[1] == 'OBP' or comparison_labels[1] == 'SLG'):
+                y2.append(round(df[comparison_labels[1]][i], 3))
+            elif (comparison_labels[1] == 'ERA' or comparison_labels[1] == 'WHIP' ):
+                y2.append(round(df[comparison_labels[1]][i], 2))
+            elif (comparison_labels[1] == 'IP'):
+                y2.append(round(df[comparison_labels[1]][i], 1))
+            else:
+                y2.append(df[comparison_labels[1]][i])
 
     fig, ax1 = plt.subplots()
-    if len(y1) == 0:
-        return 'This is an empty list'
-    else:
-        y1max = max(y1)
+
+    y1max = max(y1)
 
     ax1.set_title(player + "'s " + comparison_labels[1] + " statistics")
     ax2 = ax1.twinx()
@@ -299,7 +304,12 @@ def make_chart2(player, stat, player_type):
     ax2.set_ylim(ymin * scale_factor, ymax * (1 + scale_factor))
     #mplcursors.cursor(hover=True)
 
-    autolabel(rects2, y2, ax2)
+    # blue dots on top of red bars
+    ax1.set_zorder(ax2.get_zorder()+1)
+    ax1.patch.set_visible(False)
+    ax2.patch.set_visible(True)
+
+    autolabel2(rects2, y2, ax2)
 
     return fig
 
