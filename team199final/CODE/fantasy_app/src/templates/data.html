@@ -1,0 +1,126 @@
+<html>  
+  <head>
+    <title>Compare Players</title>
+    <link rel="stylesheet" type="text/css" href="/static/styles.css">
+  <script src="https://d3js.org/d3.v3.min.js"></script>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+  <style>
+  body {
+    background-color: #d1e5f0;
+    font: 14px sans-serif;
+  }
+  </style>
+  </head>
+  <body>
+  </br>
+  <a href="/"><img src="/static/home.jfif" width="50" height="50"></a>
+  <a href="/batters"><img src="/static/bat.jfif" width="50" height="50"></a>
+  <a href="/pitchers"><img src="/static/pitch.jfif" width="50" height="50"></a>
+  <h2 align="center">Compare Players</h2>
+  <div class="container">
+    <div class="panel-body"><h5>{{players[0]}} Vs {{players[1]}}</h5></div>
+  
+      <form method="POST" action="/compare">
+        <label for="sel1">Season:</label>
+        <select class="selectpicker"  id="season" name="season">
+          {% for season in seasons %}
+            <option value="{{season}}">{{season}}</option>
+          {% endfor %}
+        </select>
+        <div class="mt-4 col-md-12">
+        </div>
+        <div class="container" id="cmp">
+          <div class="panel panel-default">
+            <div class="panel-body">
+              {% for stat in stats %}
+              <div class="checkbox">
+                <label><input type="checkbox" name="stats" value="{{stat}}"> {{stat}}</label>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+         <input class="btn btn-primary" type="submit" value="Compare These Stats">
+        </div>
+    </form>
+            <script type="text/javascript">
+
+
+            // User enters the player //
+            var name_one = "";
+            var name_two = "";
+
+            var name_one = "Mike Trout";
+            var name_two = "Shohei Ohtani";
+
+
+
+            // -------------------------------------------//
+
+            var key_one;
+            var key_two;
+
+
+
+
+            d3.json("name_key.json", function(data) {
+                data.map(function(id) {
+                    if (id["Name"] == name_one)  {
+                        key_one = id["Key"];
+                        return;
+                    }
+                    if (id["Name"] == name_two)  {
+                        key_two = id["Key"];
+                        return;
+                    }
+                    // console.log(id["Name"] );
+                });
+
+                console.log("key_one: ", key_one);
+                console.log("key_two: ", key_two);
+
+                var link_one = "https://securea.mlb.com/mlb/images/players/head_shot/" + key_one + ".jpg"
+                var link_two = "https://securea.mlb.com/mlb/images/players/head_shot/" + key_two + ".jpg"
+
+                console.log("link_one", link_one);
+                console.log("link_two", link_one);
+
+
+
+                var svg = d3.select("body")
+                    .append("svg")
+                    .attr("width", 400)
+                    .attr("height",300)
+                    // .style("border", "1px solid black");
+
+                var imgs = svg.selectAll("image").data([0]);
+                    imgs.enter()
+                    .append("svg:image")
+                    .attr("xlink:href", link_one)
+                    .attr("x", "100")
+                    .attr("y", "30")
+                    .attr("width", "300")
+                    .attr("height", "300");
+
+                var svg2 = d3.select("body")
+                    .append("svg")
+                    .attr("width", 400)
+                    .attr("height", 300)
+                    // .style("border", "1px solid black");
+
+                var imgs2 = svg2.selectAll("image").data([0]);
+                    imgs2.enter()
+                    .append("svg:image")
+                    .attr("xlink:href", link_two)
+                    .attr("x", "100")
+                    .attr("y", "30")
+                    .attr("width", "300")
+                    .attr("height", "300");
+                });
+
+
+
+        </script>
+  </body>
+</html>  

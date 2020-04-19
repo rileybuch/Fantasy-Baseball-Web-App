@@ -1,0 +1,119 @@
+<html>  
+  <head>
+    <title>Player Comparison Chart</title>
+    <link rel="stylesheet" type="text/css" href="/static/styles.css">
+  <script src="https://d3js.org/d3.v3.min.js"></script>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+  <style>
+  body {
+    background-color: #d1e5f0;
+    font: 14px sans-serif;
+  }
+  </style>
+  </head>         
+  <body>
+
+<!--       <div id="players">
+      <h1 class="one">{{players[0]}}</h1>
+      <h1 class="two">{{players[1]}}</h1>
+    </div> -->
+    <a href="/"><img src="/static/home.jfif" width="50" height="50"></a>
+    <a href="/batters"><img src="/static/bat.jfif" width="50" height="50"></a> 
+    <a href="/pitchers"><img src="/static/pitch.jfif" width="50" height="50"></a>
+    <h2 align="center">Player Comparison</h2></br>
+
+         <script type="text/javascript">
+
+            // var player = {{players[0]}}
+
+            var first = document.createElement("div");
+            first.id = "players";
+            first.innerHTML = '<h1 class="one">{{players[0]}}</h1>';
+
+            var second = document.createElement("div");
+            second.id = "players";
+            second.innerHTML = '<h1 class="two">{{players[1]}}</h1>';
+
+            var img_first = first.innerText
+            var img_second = second.innerText
+            console.log(img_first);
+
+
+            var name_one = img_first;
+            var name_two = img_second;
+
+
+
+            // -------------------------------------------//
+
+            var key_one;
+            var key_two;
+            // 559206
+
+            d3.json("/image", function(data) {
+                data.map(function(id) {
+                    // console.log(id)
+                    if (id["Name"] == name_one && id["key_mlbam"] != 595375 && id["key_mlbam"] != 559206 && id["key_mlbam"] != 283166 && id["key_mlbam"] != 502264)  {
+                        key_one = id["key_mlbam"];
+                        return;
+                    }
+                    if (id["Name"] == name_two && id["key_mlbam"] != 595375 && id["key_mlbam"] != 559206 && id["key_mlbam"] != 283166 && id["key_mlbam"] != 502264)  {
+                        key_two = id["key_mlbam"];
+                        return;
+                    }
+                    // console.log(id["Name"] );
+                });
+
+                console.log("key_one: ", key_one);
+                console.log("key_two: ", key_two);
+
+                var link_one = "https://securea.mlb.com/mlb/images/players/head_shot/" + key_one + ".jpg"
+                var link_two = "https://securea.mlb.com/mlb/images/players/head_shot/" + key_two + ".jpg"
+
+                console.log("link_one", link_one);
+                console.log("link_two", link_one);
+
+
+
+                var svg = d3.select("body")
+                    .append("svg")
+                    .attr("width", 450)
+                    .attr("height",300)
+                    // .style("border", "1px solid black");
+
+                var imgs = svg.selectAll("image").data([0]);
+                    imgs.enter()
+                    .append("svg:image")
+                    .attr("xlink:href", link_one)
+                    .attr("x", "250")
+                    .attr("y", "30")
+                    .attr("width", "250")
+                    .attr("height", "250");
+
+                var svg2 = d3.select("body")
+                    .append("svg")
+                    .attr("width", 400)
+                    .attr("height", 300)
+                    // .style("border", "1px solid black");
+
+                var imgs2 = svg2.selectAll("image").data([0]);
+                    imgs2.enter()
+                    .append("svg:image")
+                    .attr("xlink:href", link_two)
+                    .attr("x", "150")
+                    .attr("y", "30")
+                    .attr("width", "250")
+                    .attr("height", "250");
+                });
+
+
+
+        </script>
+  <div class="container">
+    <div class="panel-body"  align="center">
+      <img  src="data:image/png;base64, {{image}}">
+    </div>
+  </div>
+  </body>
+</html>  
