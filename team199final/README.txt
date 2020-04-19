@@ -21,7 +21,9 @@ The application can be accessed at the following url:
 
 localhost:8080
 
-This url will lead to the application's home page.
+This url will lead to the application's home page. This application will present our projections, but the analysis and models used can be found at:
+
+https://github.com/cse6242teamsport/fantasy_baseball
 
 # Fantasy APP functions
 ​
