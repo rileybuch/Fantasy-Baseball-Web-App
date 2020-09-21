@@ -12,7 +12,7 @@ https://docs.docker.com/get-docker/
 
 Once docker is installed, use the terminal/command prompt to go into the fantasy_app directory. Once in the directory, run docker-compose up. For example, if the zip file was in the Downloads directory, the following commands would be used to start the application:
 
-cd Downloads/team199final/CODE/fantasy_app
+cd Downloads/team199final/CODE/fantasy_app  
 docker-compose up
 
 The containers for the app and the MySQL database will start building. Once the two containers finish building, the application will automatically start. 
@@ -21,7 +21,7 @@ The application can be accessed at the following url:
 
 localhost:8080
 
-This url will lead to the application's home page. This application will present our projections, but the analysis and models used can be found at:
+This url will lead to the application's home page. This application will present our projections, and the analysis and models used can be found at:
 
 https://github.com/rileybuch/fantasy_baseball
 
