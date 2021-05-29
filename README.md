@@ -1,8 +1,10 @@
-# fantasy_baseball
+# Fantasy Baseball Draft Application
 
-To run the app, go to the folder team199Final and follow the instructions: 
+## Overview
+Don't be overwhelmed by all of the data tables and statistics you can find when you are preparing for your fantasy baseball draft. This platform will give you an easy-to-digest way to do your research. You'll find accurate projections for MLB players' stats, a customizable interface that allows you to input your league's settings and personal risk tolerance in order to generate rankings that are best for you. Easily compare players or see historical performance with graphs and charts that make interpreting the tabular data easier. 
 
-Installation
+## Installation
+To run the app, navigate to the folder team199Final and follow the instructions: 
 
 In order to run our platform, Docker needs to be installed.
 
@@ -10,7 +12,7 @@ The instructions to install Docker can be found here:
 
 https://docs.docker.com/get-docker/
 
-Once docker is installed, use the terminal/command prompt to go into the fantasy_app directory. Once in the directory, run docker-compose up. For example, if the zip file was in the Downloads directory, the following commands would be used to start the application:
+Once docker is installed, use the terminal/command prompt to navigate into the fantasy_app directory. Once in the directory, run docker-compose up. For example, if the zip file was in the Downloads directory, the following commands would be used to start the application:
 
 cd Downloads/team199final/CODE/fantasy_app  
 docker-compose up
@@ -21,11 +23,11 @@ The application can be accessed at the following url:
 
 localhost:8080
 
-This url will lead to the application's home page. This application will present our projections, and the analysis and models used can be found at:
+This url will lead to the application's home page. This application will present our projections and the visualizations. The analysis and models used can be found at:
 
 https://github.com/rileybuch/fantasy_baseball
 
-# Fantasy App functions
+# Features
 
 ## Projected statistics for players in 2020 
 
