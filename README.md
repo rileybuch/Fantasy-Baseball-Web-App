@@ -1,7 +1,7 @@
 # Fantasy Baseball Draft Application
 
 ## Overview
-Don't be overwhelmed by all of the data tables and statistics you can find when you are preparing for your fantasy baseball draft. This platform will give you an easy-to-digest way to do your research. You'll find accurate projections for MLB players' stats, a customizable interface that allows you to input your league's settings and personal risk tolerance in order to generate rankings that are best for you. Easily compare players or see historical performance with graphs and charts that make interpreting the tabular data easier. 
+Don't be overwhelmed by all of the data tables and statistics you can find when you are preparing for your fantasy baseball draft. This platform will give you an easy-to-digest way to do your research. You'll find accurate projections for MLB players' stats, a customizable interface that allows you to input your league's settings and personal risk tolerance in order to generate rankings that are best for you. Easily compare players and visualize historical trends with graphs and charts that make interpreting the tabular data easier, allowing you to make better draft decisions.
 
 ## Installation
 To run the app, navigate to the folder team199Final and follow the instructions: 
